@@ -1,0 +1,1801 @@
+// resources/sass/app.scss
+
+// Import Bootstrap (ใช้การตั้งค่าเดิมจาก vite.config.js)
+// @import "bootstrap/scss/bootstrap";
+// @use "bootstrap/scss/bootstrap";
+@import 'bootstrap/dist/css/bootstrap.min.css';
+// Import Font Awesome CSS (ใช้ version ที่มีอยู่แล้ว 6.4.0)
+@import '~@fortawesome/fontawesome-free/css/all.min.css';
+
+// ========================================
+// VARIABLES - รวมทั้งเดิมและใหม่
+// ========================================
+
+:root {
+    // Monetro.io Brand Colors (ใหม่ - สำหรับ Welcome/Login/Register)
+    --monetro-brand-primary: #667eea;
+    --monetro-brand-secondary: #764ba2;
+    --monetro-brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --monetro-brand-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    --monetro-brand-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
+    --monetro-brand-border-radius: 15px;
+    --monetro-brand-transition: all 0.3s ease;
+
+    // Dashboard Colors (เดิม - สำหรับ Dashboard/Admin)
+    --monetro-primary: #4e73df;
+    --monetro-primary-dark: #224abe;
+    --monetro-primary-light: #6f8ae8;
+
+    // Financial colors
+    --monetro-success: #1cc88a; // Income/Profit
+    --monetro-danger: #e74a3b; // Expense/Loss
+    --monetro-warning: #f6c23e; // Investment/Warning
+    --monetro-info: #36b9cc; // Information
+    --monetro-dark: #5a5c69;
+
+    // Gray scale
+    --monetro-gray-100: #f8f9fc;
+    --monetro-gray-200: #eaecf4;
+    --monetro-gray-300: #dddfeb;
+    --monetro-gray-400: #d1d3e2;
+    --monetro-gray-500: #b7b9cc;
+    --monetro-gray-600: #858796;
+    --monetro-gray-700: #6e707e;
+    --monetro-gray-800: #5a5c69;
+    --monetro-gray-900: #3a3b45;
+
+    // Shadows
+    --monetro-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    --monetro-shadow-lg: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.25);
+
+    // Transitions
+    --monetro-transition: all 0.3s ease;
+
+    // Login specific (เดิม)
+    --login-primary: #4361ee;
+    --login-secondary: #3f37c9;
+    --login-accent: #4cc9f0;
+    --login-light: #f8f9fa;
+    --login-dark: #212529;
+}
+
+// ========================================
+// MIXINS - ใหม่
+// ========================================
+
+@mixin monetro-brand-gradient {
+    background: linear-gradient(135deg, var(--monetro-brand-primary) 0%, var(--monetro-brand-secondary) 100%);
+}
+
+@mixin monetro-card {
+    background: white;
+    border-radius: var(--monetro-brand-border-radius);
+    box-shadow: var(--monetro-brand-shadow);
+    overflow: hidden;
+    transition: var(--monetro-brand-transition);
+}
+
+@mixin monetro-card-hover {
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--monetro-brand-shadow-hover);
+    }
+}
+
+@mixin monetro-button {
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    transition: var(--monetro-brand-transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    border: none;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+}
+
+@mixin floating-animation {
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    animation: float 3s ease-in-out infinite;
+}
+
+// ========================================
+// BASE STYLES
+// ========================================
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    // Default dashboard layout
+    &:not(.auth-layout):not(.welcome-layout) {
+        background-color: var(--monetro-gray-100);
+    }
+
+    // Brand gradient background for auth/welcome pages
+    &.monetro-gradient {
+        @include monetro-brand-gradient;
+    }
+
+    // Auth pages layout (login/register)
+    &.auth-layout {
+        @include monetro-brand-gradient;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 2rem 0;
+    }
+
+    // Welcome page layout
+    &.welcome-layout {
+        @include monetro-brand-gradient;
+    }
+
+    // General auth page body styling (เดิม)
+    &.auth-page {
+        background: linear-gradient(135deg, #f5f7fb 0%, #e8f4f8 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+    }
+}
+
+// ========================================
+// NAVIGATION STYLES
+// ========================================
+
+.navbar-custom {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: white !important;
+    }
+
+    .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        transition: var(--monetro-brand-transition);
+
+        &:hover {
+            color: white !important;
+            transform: translateY(-1px);
+        }
+    }
+}
+
+// Navbar customization (เดิม)
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+
+    .fas,
+    .far,
+    .fab {
+        color: #fff;
+        margin-right: 0.5rem;
+    }
+}
+
+.nav-link {
+
+    .fas,
+    .far,
+    .fab {
+        margin-right: 0.25rem;
+        width: 16px;
+        text-align: center;
+    }
+}
+
+// ========================================
+// AUTHENTICATION CARDS - ใหม่
+// ========================================
+
+// Base auth card styles
+.auth-card {
+    margin: 0 auto;
+    @include monetro-card;
+
+    // Login specific
+    &.login-card {
+        max-width: 400px;
+    }
+
+    // Register specific
+    &.register-card {
+        max-width: 450px;
+    }
+}
+
+// Auth card header
+.auth-header {
+    @include monetro-brand-gradient;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+
+    i {
+        @include floating-animation;
+    }
+}
+
+// Auth card body
+.auth-body {
+    padding: 2rem;
+}
+
+// ========================================
+// FORM STYLES - ใหม่
+// ========================================
+
+// Floating label styles
+.floating-label {
+    position: relative;
+    margin-bottom: 1rem;
+
+    .form-control {
+        padding: 1rem 0.75rem 0.5rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: var(--monetro-brand-transition);
+
+        &:focus {
+            border-color: var(--monetro-brand-primary);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        &:focus+label,
+        &:not(:placeholder-shown)+label {
+            top: 0;
+            font-size: 12px;
+            color: var(--monetro-brand-primary);
+            transform: translateY(-50%);
+        }
+    }
+
+    label {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: white;
+        padding: 0 0.5rem;
+        color: #6c757d;
+        font-size: 16px;
+        pointer-events: none;
+        transition: var(--monetro-brand-transition);
+        z-index: 1;
+    }
+}
+
+// Input group styles
+.input-group {
+    .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        color: #6c757d;
+    }
+
+    .form-control {
+        border-left: none;
+    }
+
+    &:focus-within .input-group-text {
+        border-color: var(--monetro-brand-primary);
+        background: #fff;
+        color: var(--monetro-brand-primary);
+    }
+}
+
+// Form control focus states (เดิม)
+.form-control:focus {
+    border-color: var(--login-accent);
+    box-shadow: 0 0 0 0.25rem rgba(76, 201, 240, 0.25);
+}
+
+// ========================================
+// BUTTON STYLES
+// ========================================
+
+// Primary auth button (ใหม่)
+.btn-auth {
+    @include monetro-button;
+    @include monetro-brand-gradient;
+    color: white;
+
+    &:hover {
+        color: white;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+}
+
+// Hero buttons for welcome page (ใหม่)
+.btn-hero {
+    @include monetro-button;
+
+    &-primary {
+        background: white;
+        color: var(--monetro-brand-primary);
+        border: 2px solid white;
+
+        &:hover {
+            background: transparent;
+            color: white;
+        }
+    }
+
+    &-outline {
+        background: transparent;
+        color: white;
+        border: 2px solid white;
+
+        &:hover {
+            background: white;
+            color: var(--monetro-brand-primary);
+        }
+    }
+
+    &-gradient {
+        @include monetro-brand-gradient;
+        color: white;
+        border: none;
+
+        &:hover {
+            color: white;
+        }
+    }
+}
+
+// Login button styling (เดิม)
+.btn-login {
+    background-color: var(--login-primary);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background-color: var(--login-secondary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+        padding: 0.75rem 1.5rem;
+    }
+
+    // Loading state
+    &.loading {
+        position: relative;
+        color: transparent;
+
+        &::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    }
+}
+
+// Button improvements with Font Awesome icons (เดิม)
+.btn {
+
+    .fas,
+    .far,
+    .fab {
+        margin-right: 0.5rem;
+
+        &:last-child {
+            margin-right: 0;
+            margin-left: 0.5rem;
+        }
+    }
+}
+
+// ========================================
+// WELCOME PAGE SPECIFIC - ใหม่
+// ========================================
+
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-icon {
+    @include floating-animation;
+
+    &:hover {
+        animation-duration: 0.5s;
+    }
+}
+
+// Market ticker
+.market-ticker {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 1rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+
+    .ticker-content {
+        display: inline-flex;
+        animation: scroll 30s linear infinite;
+    }
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+// Features section
+.features-section {
+    background: white;
+    position: relative;
+    z-index: 1;
+}
+
+.feature-card {
+    @include monetro-card;
+    @include monetro-card-hover;
+    padding: 2rem;
+    height: 100%;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    @include monetro-brand-gradient;
+    color: white;
+}
+
+// CTA section
+.cta-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+// ========================================
+// DASHBOARD STYLES (เดิม)
+// ========================================
+
+// Card improvements
+.card {
+    box-shadow: var(--monetro-shadow) !important;
+    border: none;
+    transition: var(--monetro-transition);
+
+    &:hover {
+        box-shadow: var(--monetro-shadow-lg) !important;
+        transform: translateY(-2px);
+    }
+}
+
+.card-header {
+    background-color: var(--monetro-gray-100);
+    border-bottom: 1px solid var(--monetro-gray-300);
+
+    .fas,
+    .far,
+    .fab {
+        margin-right: 0.5rem;
+        color: var(--monetro-primary);
+    }
+}
+
+// Custom border utilities (ใช้แทน Tailwind ใน financial cards)
+.border-start-primary {
+    border-left: 0.25rem solid var(--monetro-primary) !important;
+}
+
+.border-start-success {
+    border-left: 0.25rem solid var(--monetro-success) !important;
+}
+
+.border-start-danger {
+    border-left: 0.25rem solid var(--monetro-danger) !important;
+}
+
+.border-start-warning {
+    border-left: 0.25rem solid var(--monetro-warning) !important;
+}
+
+.border-start-info {
+    border-left: 0.25rem solid var(--monetro-info) !important;
+}
+
+// ========================================
+// UTILITY STYLES
+// ========================================
+
+// Password strength meter (ใหม่)
+.strength-meter {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    transition: var(--monetro-brand-transition);
+
+    &.strength-weak {
+        background-color: #dc3545;
+    }
+
+    &.strength-medium {
+        background-color: #ffc107;
+    }
+
+    &.strength-strong {
+        background-color: #198754;
+    }
+}
+
+// Auth page links (ใหม่)
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    color: #6c757d;
+
+    a {
+        color: var(--monetro-brand-primary);
+        font-weight: 600;
+        transition: var(--monetro-brand-transition);
+
+        &:hover {
+            color: var(--monetro-brand-secondary);
+            text-decoration: underline !important;
+        }
+    }
+}
+
+// Text utilities (เสริม Bootstrap)
+.text-xs {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+// Gray text colors
+.text-gray-800 {
+    color: var(--monetro-gray-800) !important;
+}
+
+.text-gray-700 {
+    color: var(--monetro-gray-700) !important;
+}
+
+.text-gray-600 {
+    color: var(--monetro-gray-600) !important;
+}
+
+.text-gray-500 {
+    color: var(--monetro-gray-500) !important;
+}
+
+.text-gray-400 {
+    color: var(--monetro-gray-400) !important;
+}
+
+// Icon color utilities (สำหรับ Font Awesome)
+.icon-primary {
+    color: var(--monetro-primary) !important;
+}
+
+.icon-success {
+    color: var(--monetro-success) !important;
+}
+
+.icon-danger {
+    color: var(--monetro-danger) !important;
+}
+
+.icon-warning {
+    color: var(--monetro-warning) !important;
+}
+
+.icon-info {
+    color: var(--monetro-info) !important;
+}
+
+// Footer (ใหม่)
+.footer-custom {
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    a {
+        color: rgba(255, 255, 255, 0.8);
+        transition: color 0.3s ease;
+
+        &:hover {
+            color: white;
+        }
+    }
+}
+
+// Test button (ใหม่)
+.test-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    @include monetro-brand-gradient;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: var(--monetro-brand-transition);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        color: white;
+    }
+}
+
+// Loading animation (ใหม่)
+.loading-animation {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// ========================================
+// FINANCIAL & DASHBOARD SPECIFIC (เดิม)
+// ========================================
+
+// Financial status indicators
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+
+    .fas {
+        margin-right: 0.5rem;
+
+        &.fa-circle {
+            font-size: 0.5rem;
+        }
+    }
+
+    &.status-profit .fa-circle {
+        color: var(--monetro-success);
+    }
+
+    &.status-loss .fa-circle {
+        color: var(--monetro-danger);
+    }
+
+    &.status-neutral .fa-circle {
+        color: var(--monetro-warning);
+    }
+}
+
+// Market data styling
+.market-item {
+    transition: var(--monetro-transition);
+    padding: 0.75rem;
+    border-radius: 0.35rem;
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .market-price {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .market-change {
+        font-size: 0.875rem;
+        font-weight: 600;
+
+        .fas {
+            margin-right: 0.25rem;
+        }
+    }
+}
+
+// Table hover effects
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+.table {
+
+    .fas,
+    .far,
+    .fab {
+        width: 16px;
+        text-align: center;
+    }
+}
+
+// Badge with icons
+.badge {
+
+    .fas,
+    .far,
+    .fab {
+        margin-right: 0.25rem;
+        font-size: 0.75em;
+    }
+}
+
+// Alert improvements
+.alert {
+
+    .fas,
+    .far,
+    .fab {
+        margin-right: 0.5rem;
+    }
+}
+
+// Chart containers
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 15rem;
+    width: 100%;
+}
+
+// Loading animations
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// Font Awesome custom animations
+.fa-spin-fast {
+    animation: spin 0.5s infinite linear;
+}
+
+.fa-pulse-slow {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+// Money animations สำหรับ financial app
+@keyframes money-bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.fa-money-bounce {
+    animation: money-bounce 2s infinite;
+}
+
+// Utility classes for monetro.io
+.monetro-card-stat {
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--monetro-gray-800);
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        opacity: 0.8;
+    }
+}
+
+// Quick actions styling
+.quick-actions {
+    .btn {
+        margin-bottom: 0.5rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Financial data table
+.financial-table {
+    .amount-positive {
+        color: var(--monetro-success);
+        font-weight: 600;
+
+        &::before {
+            content: '+';
+        }
+    }
+
+    .amount-negative {
+        color: var(--monetro-danger);
+        font-weight: 600;
+    }
+
+    .amount-neutral {
+        color: var(--monetro-warning);
+        font-weight: 600;
+    }
+
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .ticker-tape {
+        animation: ticker 30s linear infinite;
+    }
+
+    @keyframes ticker {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    .investment-card {
+        transition: all 0.3s ease;
+    }
+
+    .bg-monetro {
+        background-color: var(--monetro-primary);
+    }
+}
+
+.bg-monetro {
+    background-color: var(--monetro-primary);
+}
+
+// ========================================
+// LOGIN FORM STYLES - เดิมที่ปรับปรุง
+// ========================================
+
+// Login container styling
+.login-container {
+    max-width: 450px;
+    margin: 5rem auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+
+    @media (max-width: 768px) {
+        margin: 2rem auto;
+        max-width: 90%;
+    }
+}
+
+// Login header with gradient
+.login-header {
+    background: linear-gradient(135deg, var(--login-primary), var(--login-secondary));
+    color: white;
+    padding: 2rem;
+    text-align: center;
+
+    i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    h1 {
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    p {
+        margin-bottom: 0;
+        opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+
+        i {
+            font-size: 2.5rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+        }
+    }
+}
+
+// Login body
+.login-body {
+    background-color: white;
+    padding: 2rem;
+
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+    }
+}
+
+// Forgot password link
+.forgot-password {
+    color: var(--login-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: var(--login-secondary);
+        text-decoration: underline;
+    }
+}
+
+// Divider styling
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+
+    &::before,
+    &::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+}
+
+.divider-text {
+    padding: 0 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 500;
+    background-color: white;
+}
+
+// Social login buttons
+.social-login {
+    .btn {
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        margin: 0 0.5rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            display: block;
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+    }
+}
+
+.btn-google {
+    background-color: #db4437;
+    border-color: #db4437;
+    color: white;
+
+    &:hover {
+        background-color: #c23321;
+        border-color: #c23321;
+    }
+}
+
+.btn-facebook {
+    background-color: #4267B2;
+    border-color: #4267B2;
+    color: white;
+
+    &:hover {
+        background-color: #365899;
+        border-color: #365899;
+    }
+}
+
+// Register link
+.register-link {
+    text-align: center;
+    margin-top: 1.5rem;
+
+    a {
+        color: var(--login-primary);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: var(--login-secondary);
+            text-decoration: underline;
+        }
+    }
+}
+
+// Password toggle button
+.password-toggle {
+    background-color: transparent;
+    border: none;
+    color: #6c757d;
+    transition: all 0.2s ease;
+
+    &:hover {
+        color: var(--login-primary);
+        background-color: rgba(67, 97, 238, 0.1);
+    }
+
+    &:focus {
+        box-shadow: none;
+        color: var(--login-primary);
+    }
+}
+
+// Form validation styling
+.was-validated .form-control:valid {
+    border-color: var(--bs-success);
+
+    &:focus {
+        border-color: var(--bs-success);
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    }
+}
+
+.was-validated .form-control:invalid {
+    border-color: var(--bs-danger);
+
+    &:focus {
+        border-color: var(--bs-danger);
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+}
+
+// Alert styling for auth pages
+.auth-alert {
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: none;
+
+    &.alert-success {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: var(--bs-success);
+    }
+
+    &.alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: var(--bs-danger);
+    }
+}
+
+// Remember me checkbox custom styling
+.form-check-input:checked {
+    background-color: var(--login-primary);
+    border-color: var(--login-primary);
+}
+
+.form-check-input:focus {
+    border-color: var(--login-accent);
+    box-shadow: 0 0 0 0.25rem rgba(76, 201, 240, 0.25);
+}
+
+// ========================================
+// RESPONSIVE DESIGN
+// ========================================
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 80vh;
+        padding: 2rem 0;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .btn-hero {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .auth-card {
+        margin: 1rem;
+        max-width: none;
+    }
+
+    .auth-header,
+    .auth-body {
+        padding: 1.5rem;
+    }
+
+    .chart-area,
+    .chart-pie {
+        height: 12rem;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .fa-hide-mobile {
+        display: none !important;
+    }
+
+    .btn {
+
+        .fas,
+        .far,
+        .fab {
+            margin-right: 0.25rem;
+        }
+
+        .btn-text {
+            display: none;
+        }
+    }
+
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .market-item {
+        padding: 0.5rem;
+    }
+}
+
+// ========================================
+// PRINT STYLES
+// ========================================
+
+@media print {
+
+    .fas,
+    .far,
+    .fab {
+        color: #000 !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    .test-button,
+    .navbar-custom {
+        display: none !important;
+    }
+}
+
+// ========================================
+// SCROLLBAR CUSTOMIZATION
+// ========================================
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--monetro-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--monetro-gray-400);
+    border-radius: 4px;
+
+    &:hover {
+        background: var(--monetro-gray-500);
+    }
+}
+
+// ========================================
+// ADDITIONAL UTILITIES & COMPONENTS
+// ========================================
+
+// Brand gradient utility class
+.monetro-brand-gradient {
+    @include monetro-brand-gradient;
+}
+
+// Dashboard gradient (original)
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+// Hover effects
+.card-hover {
+    @include monetro-card-hover;
+}
+
+// Animation utilities
+.float-animation {
+    @include floating-animation;
+}
+
+// Ticker animations
+.ticker-tape {
+    animation: ticker 30s linear infinite;
+}
+
+@keyframes ticker {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+// Investment card specific
+.investment-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+}
+
+// Status badges for financial data
+.status-badge {
+    &.profit {
+        background-color: var(--monetro-success);
+        color: white;
+    }
+
+    &.loss {
+        background-color: var(--monetro-danger);
+        color: white;
+    }
+
+    &.neutral {
+        background-color: var(--monetro-warning);
+        color: white;
+    }
+}
+
+// Financial amount displays
+.financial-amount {
+    font-weight: 700;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+
+    &.positive {
+        color: var(--monetro-success);
+
+        &::before {
+            content: '+';
+        }
+    }
+
+    &.negative {
+        color: var(--monetro-danger);
+    }
+
+    &.neutral {
+        color: var(--monetro-warning);
+    }
+}
+
+// Progress bars with brand colors
+.progress-bar-monetro {
+    @include monetro-brand-gradient;
+}
+
+// Custom shadows
+.shadow-monetro {
+    box-shadow: var(--monetro-brand-shadow) !important;
+}
+
+.shadow-monetro-lg {
+    box-shadow: var(--monetro-brand-shadow-hover) !important;
+}
+
+// Text selection styling
+::selection {
+    background-color: var(--monetro-brand-primary);
+    color: white;
+}
+
+::-moz-selection {
+    background-color: var(--monetro-brand-primary);
+    color: white;
+}
+
+// Focus outline for accessibility
+*:focus {
+    outline: 2px solid var(--monetro-brand-primary);
+    outline-offset: 2px;
+}
+
+// Remove default focus styles for mouse users
+.js-focus-visible *:focus:not(.focus-visible) {
+    outline: none;
+}
+
+// Dark mode support (future enhancement)
+@media (prefers-color-scheme: dark) {
+    :root {
+        --monetro-gray-100: #1a1a1a;
+        --monetro-gray-200: #2d2d2d;
+        --monetro-gray-300: #404040;
+        --monetro-gray-400: #525252;
+        --monetro-gray-500: #737373;
+        --monetro-gray-600: #a3a3a3;
+        --monetro-gray-700: #d4d4d4;
+        --monetro-gray-800: #e5e5e5;
+        --monetro-gray-900: #f5f5f5;
+    }
+
+    body:not(.auth-layout):not(.welcome-layout) {
+        background-color: var(--monetro-gray-100);
+        color: var(--monetro-gray-800);
+    }
+
+    .card {
+        background-color: var(--monetro-gray-200);
+        color: var(--monetro-gray-800);
+    }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+    :root {
+        --monetro-brand-primary: #000080;
+        --monetro-brand-secondary: #4b0082;
+        --monetro-success: #006400;
+        --monetro-danger: #8b0000;
+        --monetro-warning: #b8860b;
+    }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .hero-icon,
+    .float-animation,
+    .ticker-content {
+        animation: none !important;
+    }
+}
+
+// Print-friendly utilities
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .card {
+        break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        break-after: avoid;
+    }
+}
+
+// Debug utilities (remove in production)
+.debug-outline * {
+    outline: 1px solid red !important;
+}
+
+.debug-grid {
+    background-image: linear-gradient(to right, rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+// Performance optimizations
+.gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+// Container queries support (future enhancement)
+@container (min-width: 768px) {
+    .auth-card {
+        max-width: 500px;
+    }
+}
+
+// Final utility - ensure all styles are loaded
+body::after {
+    content: "";
+    display: none;
+}
+
+
+// ========================================
+// 3. เพิ่มใน resources/sass/app.scss ต่อจากโค้ดเดิม
+// ========================================
+
+
+// ========================================
+// LEGAL PAGES STYLES
+// ========================================
+
+.legal-layout {
+    background-color: #f8f9fa;
+    font-family: 'Figtree', sans-serif;
+    line-height: 1.6;
+}
+
+.legal-header {
+    background: linear-gradient(135deg, var(--monetro-brand-primary) 0%, var(--monetro-brand-secondary) 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: var(--monetro-brand-border-radius);
+    margin-bottom: 3rem;
+
+    .legal-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+
+        @media (max-width: 768px) {
+            font-size: 2.5rem;
+        }
+    }
+
+    .legal-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .privacy-badges {
+        .badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+    }
+}
+
+.legal-content {
+    background: white;
+    padding: 3rem;
+    border-radius: var(--monetro-brand-border-radius);
+    box-shadow: var(--monetro-brand-shadow);
+
+    @media (max-width: 768px) {
+        padding: 2rem;
+    }
+
+    .legal-section {
+        margin-bottom: 3rem;
+
+        h2 {
+            color: var(--monetro-brand-primary);
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--monetro-brand-primary);
+        }
+
+        h3 {
+            color: var(--monetro-gray-800);
+            font-weight: 600;
+            font-size: 1.4rem;
+            margin: 2rem 0 1rem 0;
+        }
+
+        h4 {
+            color: var(--monetro-gray-700);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        p {
+            color: var(--monetro-gray-700);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        ul {
+            color: var(--monetro-gray-700);
+            margin-bottom: 1.5rem;
+
+            li {
+                margin-bottom: 0.5rem;
+                padding-left: 0.5rem;
+
+                strong {
+                    color: var(--monetro-gray-800);
+                }
+            }
+        }
+    }
+
+    .highlight {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-left: 4px solid var(--monetro-brand-primary);
+        padding: 1rem 1.5rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 600;
+        color: var(--monetro-brand-primary);
+    }
+
+    .disclaimer {
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+        padding: 1rem 1.5rem;
+        border-radius: 0 8px 8px 0;
+        font-weight: 600;
+        color: #856404;
+    }
+
+    .privacy-commitment {
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);
+        border: 2px solid var(--monetro-success);
+        border-radius: var(--monetro-brand-border-radius);
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+
+        h3 {
+            color: var(--monetro-success);
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: var(--monetro-success);
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+    }
+
+    .contact-info {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+
+        p {
+            margin-bottom: 0.5rem;
+            color: var(--monetro-gray-800);
+        }
+
+        a {
+            color: var(--monetro-brand-primary);
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.legal-footer {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--monetro-brand-border-radius);
+    box-shadow: var(--monetro-brand-shadow);
+
+    .btn {
+        transition: var(--monetro-brand-transition);
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .legal-header {
+        padding: 2rem 1rem;
+        margin-bottom: 2rem;
+
+        .legal-title {
+            font-size: 2rem;
+        }
+
+        .legal-subtitle {
+            font-size: 1rem;
+        }
+    }
+
+    .legal-content {
+        padding: 1.5rem;
+
+        .legal-section {
+            margin-bottom: 2rem;
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.3rem;
+            }
+
+            p {
+                text-align: left;
+            }
+        }
+    }
+
+    .legal-footer {
+        padding: 1.5rem;
+
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+}
+
+// Print Styles
+@media print {
+    .legal-layout {
+        background: white;
+    }
+
+    .navbar,
+    .legal-footer,
+    .privacy-badges {
+        display: none !important;
+    }
+
+    .legal-header {
+        background: none !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+
+    .legal-content {
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .legal-section {
+        page-break-inside: avoid;
+
+        h2 {
+            color: black !important;
+            border-bottom-color: black !important;
+        }
+    }
+}

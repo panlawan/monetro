@@ -1,0 +1,43 @@
+// resources/sass/components/_auth.scss
+
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    .auth-card {
+        max-width: 400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: $border-radius-xl;
+        box-shadow: $box-shadow-lg;
+        overflow: hidden;
+        
+        .card-header {
+            background: linear-gradient(135deg, $primary 0%, #6366f1 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            
+            h4 {
+                margin: 0;
+                font-weight: 600;
+            }
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+    }
+}
+
+.form-floating {
+    .form-control {
+        &:focus {
+            ~ label {
+                color: $primary;
+            }
+        }
+    }
+}

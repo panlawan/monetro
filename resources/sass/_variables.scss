@@ -1,0 +1,58 @@
+// resources/sass/_variables.scss
+
+// Color System
+$primary: #4f46e5;
+$secondary: #6b7280;
+$success: #10b981;
+$danger: #ef4444;
+$warning: #f59e0b;
+$info: #3b82f6;
+$light: #f8fafc;
+$dark: #1f2937;
+
+// Typography
+$font-family-sans-serif: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-size-base: 1rem;
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-semibold: 500;
+$font-weight-bold: 600;
+$font-weight-bolder: 700;
+
+// Spacing
+$spacer: 1rem;
+$spacers: (
+    0: 0,
+    1: $spacer * 0.25,
+    2: $spacer * 0.5,
+    3: $spacer,
+    4: $spacer * 1.5,
+    5: $spacer * 3,
+    6: $spacer * 4,
+);
+
+// Border Radius
+$border-radius: 0.5rem;
+$border-radius-sm: 0.25rem;
+$border-radius-lg: 0.75rem;
+$border-radius-xl: 1rem;
+
+// Shadows
+$box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+$box-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+$box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+// Component Variables
+$navbar-padding-y: 1rem;
+$navbar-brand-font-size: 1.25rem;
+$navbar-brand-font-weight: 600;
+
+$card-border-width: 0;
+$card-border-radius: $border-radius-lg;
+$card-box-shadow: $box-shadow;
+
+$btn-border-radius: $border-radius;
+$btn-font-weight: 500;
+
+$form-floating-label-opacity: 0.7;
+$form-floating-label-transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
