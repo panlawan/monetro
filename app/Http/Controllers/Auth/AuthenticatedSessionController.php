@@ -1,9 +1,11 @@
 <?php
+// app/Http/Controllers/Auth/AuthenticatedSessionController.php
 
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +30,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Track login
+        if (auth()->user()) {
+            auth()->user()->recordLogin();
+        }
+
+        // Redirect based on user role
+        return $this->redirectUser();
     }
 
     /**
@@ -43,5 +51,21 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    /**
+     * Redirect user based on their role
+     */
+    protected function redirectUser(): RedirectResponse
+    {
+        $user = auth()->user();
+
+        // Check if user can access admin panel
+        if ($user && $user->canAccessAdmin()) {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        // Regular users go to normal dashboard
+        return redirect()->intended(RouteServiceProvider::HOME);
     }
 }

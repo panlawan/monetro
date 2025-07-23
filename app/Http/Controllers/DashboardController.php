@@ -1,18 +1,20 @@
 <?php
+// app/Http/Controllers/DashboardController.php (อัพเดท main dashboard)
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
 class DashboardController extends Controller
 {
-    public function index()
+    public function __invoke(): View
     {
-        // เช็คว่าผู้ใช้ยืนยันอีเมลแล้วหรือยัง
-        if (auth()->user()->hasVerifiedEmail()) {
-            // ยืนยันแล้ว - แสดงหน้า dashboard
-            return view('dashboard');
-        } else {
-            // ยังไม่ยืนยัน - ส่งไปหน้าแจ้งเตือน
-            return redirect()->route('verification.notice');
-        }
+        $user = auth()->user();
+        
+        // Check if user has financial data
+        $hasFinancialData = \App\Models\Transaction::where('user_id', $user->id)->exists();
+        
+        return view('dashboard', compact('hasFinancialData'));
     }
 }

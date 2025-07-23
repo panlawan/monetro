@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Register - {{ config('app.name') }}</title>
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
@@ -147,8 +148,10 @@
                                required
                                {{ old('terms') ? 'checked' : '' }}>
                         <label class="form-check-label" for="terms">
-                            I agree to the <a href="{{ route('terms') }}" target="_blank">Terms of Service</a>
-                            and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                            I agree to the 
+                            <a href="#" class="text-decoration-none terms-link" data-bs-toggle="modal" data-bs-target="#legalModal" data-type="terms">Terms of Service</a>
+                            and 
+                            <a href="#" class="text-decoration-none privacy-link" data-bs-toggle="modal" data-bs-target="#legalModal" data-type="privacy">Privacy Policy</a>
                         </label>
                         @error('terms')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -174,5 +177,176 @@
             </div>
         </div>
     </div>
+
+    <!-- Legal Documents Modal -->
+    @include('components.legal-modal')
+
+    <!-- JavaScript for Modal functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // CSRF Token setup for AJAX
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Handle modal trigger
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('.terms-link, .privacy-link')) {
+                    e.preventDefault();
+                    const type = e.target.getAttribute('data-type');
+                    loadLegalContent(type);
+                }
+            });
+
+            // Load legal content via AJAX
+            function loadLegalContent(type) {
+                const modal = document.getElementById('legalModal');
+                const modalTitle = modal.querySelector('.modal-title');
+                const modalBody = modal.querySelector('.modal-body');
+                const acceptBtn = modal.querySelector('#acceptLegalBtn');
+                
+                // Show loading state
+                modalTitle.textContent = 'Loading...';
+                modalBody.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading content...</p></div>';
+                
+                // Set accept button data
+                acceptBtn.setAttribute('data-type', type);
+                
+                // Fetch content
+                fetch(`/api/legal/${type}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    modalTitle.textContent = data.title;
+                    modalBody.innerHTML = renderLegalContent(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    modalBody.innerHTML = '<div class="alert alert-danger">Error loading content. Please try again.</div>';
+                });
+            }
+
+            // Render legal content
+            function renderLegalContent(data) {
+                let html = `
+                    <div class="legal-header-modal mb-4">
+                        <h5 class="text-primary">${data.title}</h5>
+                        <p class="text-muted mb-0">Last updated: ${data.lastUpdated}</p>
+                    </div>
+                    <div class="legal-content-modal">
+                `;
+                
+                data.sections.forEach(section => {
+                    html += `
+                        <div class="legal-section-modal mb-3">
+                            <h6 class="text-dark fw-bold">${section.title}</h6>
+                            <div class="text-muted">${section.content}</div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                return html;
+            }
+
+            // Handle accept button
+            document.getElementById('acceptLegalBtn').addEventListener('click', function() {
+                const type = this.getAttribute('data-type');
+                const termsCheckbox = document.getElementById('terms');
+                
+                // Check the terms checkbox
+                termsCheckbox.checked = true;
+                
+                // Record acceptance if user is authenticated
+                @auth
+                fetch('/api/legal/accept', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        document_type: type,
+                        accepted: true
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Acceptance recorded:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error recording acceptance:', error);
+                });
+                @endauth
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('legalModal'));
+                modal.hide();
+            });
+
+            // Password toggle functionality
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            if (togglePassword) {
+                togglePassword.addEventListener('click', function() {
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    
+                    if (type === 'password') {
+                        toggleIcon.classList.remove('fa-eye-slash');
+                        toggleIcon.classList.add('fa-eye');
+                    } else {
+                        toggleIcon.classList.remove('fa-eye');
+                        toggleIcon.classList.add('fa-eye-slash');
+                    }
+                });
+            }
+
+            // Password strength meter
+            const passwordInput = document.getElementById('password');
+            const strengthMeter = document.getElementById('strengthMeter');
+            const strengthText = document.getElementById('strengthText');
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    const strength = checkPasswordStrength(password);
+                    
+                    strengthMeter.className = 'strength-meter';
+                    strengthMeter.classList.add(`strength-${strength.level}`);
+                    strengthText.textContent = strength.text;
+                });
+            }
+
+            function checkPasswordStrength(password) {
+                if (password.length < 6) {
+                    return { level: 'weak', text: 'Password too short' };
+                }
+                
+                let score = 0;
+                if (password.length >= 8) score++;
+                if (/[a-z]/.test(password)) score++;
+                if (/[A-Z]/.test(password)) score++;
+                if (/[0-9]/.test(password)) score++;
+                if (/[^A-Za-z0-9]/.test(password)) score++;
+                
+                if (score < 3) {
+                    return { level: 'weak', text: 'Weak password' };
+                } else if (score < 4) {
+                    return { level: 'medium', text: 'Medium strength' };
+                } else {
+                    return { level: 'strong', text: 'Strong password' };
+                }
+            }
+        });
+    </script>
 </body>
 </html>
