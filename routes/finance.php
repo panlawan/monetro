@@ -1,37 +1,37 @@
 <?php
-// routes/finance.php (สร้างไฟล์ใหม่)
+// routes/finance.php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\BudgetController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\FinancialGoalController;
+use App\Http\Controllers\GoalController;
 use Illuminate\Support\Facades\Route;
 
-// Finance Routes - Protected by auth middleware
+// Finance Dashboard Routes - ใส่ middleware ที่ route แทน
 Route::middleware(['auth', 'verified'])->prefix('finance')->name('finance.')->group(function () {
     
+    // Main Finance Dashboard
+    Route::get('/', [FinanceController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [FinanceController::class, 'dashboard'])->name('dashboard');
+    
     // Transactions
-    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions');
+    Route::get('/transactions', [FinanceController::class, 'transactions'])->name('transactions');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
     Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
-    Route::post('/transactions/import', [TransactionController::class, 'bulkImport'])->name('transactions.import');
-    
-    // Categories
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::post('/categories/defaults', [CategoryController::class, 'createDefaultCategories'])->name('categories.defaults');
-    
-    // Budgets
-    Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets');
-    Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
-    Route::put('/budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
-    Route::delete('/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
     
     // Goals
-    Route::get('/goals', [FinancialGoalController::class, 'index'])->name('goals');
-    Route::post('/goals', [FinancialGoalController::class, 'store'])->name('goals.store');
-    Route::put('/goals/{goal}', [FinancialGoalController::class, 'update'])->name('goals.update');
-    Route::delete('/goals/{goal}', [FinancialGoalController::class, 'destroy'])->name('goals.destroy');
+    Route::get('/goals', [FinanceController::class, 'goals'])->name('goals');
+    Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
+    Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');
+    Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
+    Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
+    Route::post('/goals/{goal}/progress', [GoalController::class, 'addProgress'])->name('goals.progress');
+    Route::post('/goals/{goal}/complete', [GoalController::class, 'markCompleted'])->name('goals.complete');
+    
+    // Budgets
+    Route::get('/budgets', [FinanceController::class, 'budgets'])->name('budgets');
+    
+    // Reports
+    Route::get('/reports', [FinanceController::class, 'reports'])->name('reports');
 });

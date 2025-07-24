@@ -1,144 +1,127 @@
 <?php
 // app/Http/Controllers/BudgetController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Carbon\Carbon;
+use Illuminate\View\View;
 
 class BudgetController extends Controller
 {
-    public function index()
+    public function __construct()
     {
-        $userId = auth()->id();
-        
-        $budgets = Budget::where('user_id', $userId)
-            ->with('category')
-            ->latest()
-            ->get()
-            ->map(function($budget) {
-                $budget->updateSpent();
-                return $budget;
-            });
-        
-        $categories = Category::forUser($userId)
-            ->byType('expense')
-            ->active()
-            ->get();
-        
-        return view('finance.budgets.index', compact('budgets', 'categories'));
+        $this->middleware('auth');
     }
-    
+
+    /**
+     * Store a newly created budget
+     */
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'period' => 'required|in:daily,weekly,monthly,yearly',
             'category_id' => 'required|exists:categories,id',
-            'alert_percentage' => 'nullable|numeric|min:1|max:100',
+            'amount' => 'required|numeric|min:0.01',
+            'month' => 'required|integer|min:1|max:12',
+            'year' => 'required|integer|min:2020|max:2030',
+            'notes' => 'nullable|string|max:1000',
         ]);
-        
-        // Calculate start and end dates based on period
-        $dates = $this->calculateBudgetDates($request->period);
-        
+
+        // Verify category belongs to user and is expense type
+        $category = Category::where('id', $request->category_id)
+                          ->where('user_id', auth()->id())
+                          ->where('type', 'expense')
+                          ->first();
+
+        if (!$category) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid category selected.'
+            ], 422);
+        }
+
+        // Check if budget already exists
+        $existingBudget = Budget::where('user_id', auth()->id())
+                               ->where('category_id', $request->category_id)
+                               ->where('month', $request->month)
+                               ->where('year', $request->year)
+                               ->first();
+
+        if ($existingBudget) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Budget for this category and month already exists.'
+            ], 422);
+        }
+
         $budget = Budget::create([
-            'name' => $request->name,
-            'amount' => $request->amount,
-            'period' => $request->period,
-            'start_date' => $dates['start'],
-            'end_date' => $dates['end'],
-            'category_id' => $request->category_id,
             'user_id' => auth()->id(),
-            'alert_percentage' => $request->alert_percentage ?? 80,
-            'alert_enabled' => true,
-            'is_active' => true,
+            'category_id' => $request->category_id,
+            'amount' => $request->amount,
+            'month' => $request->month,
+            'year' => $request->year,
+            'notes' => $request->notes,
         ]);
-        
-        $budget->updateSpent();
-        
+
         return response()->json([
             'success' => true,
-            'message' => 'Budget created successfully',
+            'message' => 'Budget created successfully!',
             'budget' => $budget->load('category')
         ]);
     }
-    
+
+    /**
+     * Update the specified budget
+     */
     public function update(Request $request, Budget $budget): JsonResponse
     {
+        // Check if user owns this budget
         if ($budget->user_id !== auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access.'
+            ], 403);
         }
-        
+
         $request->validate([
-            'name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
-            'alert_percentage' => 'nullable|numeric|min:1|max:100',
+            'notes' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
         ]);
-        
+
         $budget->update([
-            'name' => $request->name,
             'amount' => $request->amount,
-            'alert_percentage' => $request->alert_percentage ?? $budget->alert_percentage,
-            'is_active' => $request->is_active ?? $budget->is_active,
+            'notes' => $request->notes,
+            'is_active' => $request->get('is_active', true),
         ]);
-        
-        $budget->updateSpent();
-        
+
         return response()->json([
             'success' => true,
-            'message' => 'Budget updated successfully',
+            'message' => 'Budget updated successfully!',
             'budget' => $budget->load('category')
         ]);
     }
-    
+
+    /**
+     * Remove the specified budget
+     */
     public function destroy(Budget $budget): JsonResponse
     {
+        // Check if user owns this budget
         if ($budget->user_id !== auth()->id()) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access.'
+            ], 403);
         }
-        
+
         $budget->delete();
-        
+
         return response()->json([
             'success' => true,
-            'message' => 'Budget deleted successfully'
+            'message' => 'Budget deleted successfully!'
         ]);
-    }
-    
-    private function calculateBudgetDates($period)
-    {
-        $now = Carbon::now();
-        
-        switch ($period) {
-            case 'daily':
-                return [
-                    'start' => $now->startOfDay()->toDateString(),
-                    'end' => $now->endOfDay()->toDateString()
-                ];
-            case 'weekly':
-                return [
-                    'start' => $now->startOfWeek()->toDateString(),
-                    'end' => $now->endOfWeek()->toDateString()
-                ];
-            case 'monthly':
-                return [
-                    'start' => $now->startOfMonth()->toDateString(),
-                    'end' => $now->endOfMonth()->toDateString()
-                ];
-            case 'yearly':
-                return [
-                    'start' => $now->startOfYear()->toDateString(),
-                    'end' => $now->endOfYear()->toDateString()
-                ];
-            default:
-                return [
-                    'start' => $now->startOfMonth()->toDateString(),
-                    'end' => $now->endOfMonth()->toDateString()
-                ];
-        }
     }
 }

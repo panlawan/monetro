@@ -1,8 +1,6 @@
 <?php
-// สร้าง Migrations สำหรับระบบการเงิน
+// database/migrations/xxxx_create_categories_table.php
 
-// 1. Categories Table
-// php artisan make:migration create_categories_table
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,16 +11,18 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('icon')->nullable();
-            $table->string('color', 7)->default('#6c757d'); // Hex color
-            $table->enum('type', ['income', 'expense', 'investment'])->default('expense');
+            $table->enum('type', ['income', 'expense']);
+            $table->string('color', 7)->default('#1cc88a');
+            $table->string('icon')->default('fa-circle');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
-            
+
             $table->index(['user_id', 'type']);
+            $table->index(['user_id', 'is_active']);
         });
     }
 
