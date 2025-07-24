@@ -11,7 +11,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminUserSeeder::class,
-            CategorySeeder::class,  // เพิ่มบรรทัดนี้
         ]);
         
         // Create test users if in development

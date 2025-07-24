@@ -1,6 +1,5 @@
 <?php
 // app/Models/Transaction.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,26 +12,19 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'category_id',
-        'amount',
-        'description',
-        'notes',
-        'transaction_date',
-        'type',
-        'is_recurring',
-        'recurring_type',
-        'recurring_interval',
-        'recurring_end_date',
-        'receipt_path',
+        'type', 'amount', 'description', 'transaction_date',
+        'category_id', 'user_id', 'payment_method', 'reference_number',
+        'notes', 'location', 'tags', 'unit_price', 'quantity', 'symbol',
+        'status', 'processed_at'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'unit_price' => 'decimal:4',
+        'quantity' => 'decimal:4',
         'transaction_date' => 'date',
-        'recurring_end_date' => 'date',
-        'is_recurring' => 'boolean',
-        'recurring_interval' => 'integer',
+        'processed_at' => 'datetime',
+        'tags' => 'array',
     ];
 
     // Relationships
@@ -57,46 +49,52 @@ class Transaction extends Model
         return $query->where('type', 'expense');
     }
 
+    public function scopeInvestment($query)
+    {
+        return $query->where('type', 'investment');
+    }
+
+    public function scopeThisMonth($query)
+    {
+        return $query->whereBetween('transaction_date', [
+            Carbon::now()->startOfMonth(),
+            Carbon::now()->endOfMonth()
+        ]);
+    }
+
+    public function scopeThisYear($query)
+    {
+        return $query->whereBetween('transaction_date', [
+            Carbon::now()->startOfYear(),
+            Carbon::now()->endOfYear()
+        ]);
+    }
+
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
     }
 
-    public function scopeThisMonth($query)
-    {
-        return $query->whereMonth('transaction_date', now()->month)
-                    ->whereYear('transaction_date', now()->year);
-    }
-
-    public function scopeThisYear($query)
-    {
-        return $query->whereYear('transaction_date', now()->year);
-    }
-
-    public function scopeInDateRange($query, $startDate, $endDate)
+    public function scopeDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('transaction_date', [$startDate, $endDate]);
     }
 
-    // Accessors
-    public function getFormattedAmountAttribute(): string
+    // Accessors & Mutators
+    public function getFormattedAmountAttribute()
     {
         return number_format($this->amount, 2);
     }
 
-    public function getTypeDisplayNameAttribute(): string
+    public function getAbsoluteAmountAttribute()
     {
-        return match($this->type) {
-            'income' => 'รายรับ',
-            'expense' => 'รายจ่าย',
-            default => 'ไม่ระบุ'
-        };
+        return abs($this->amount);
     }
 
-    public function getAmountWithSignAttribute(): string
+    public function getDisplayAmountAttribute()
     {
-        $sign = $this->type === 'income' ? '+' : '-';
-        return $sign . $this->formatted_amount;
+        $prefix = $this->type === 'income' ? '+' : '-';
+        return $prefix . '฿' . number_format(abs($this->amount), 2);
     }
 
     // Methods
@@ -108,5 +106,41 @@ class Transaction extends Model
     public function isExpense(): bool
     {
         return $this->type === 'expense';
+    }
+
+    public function isInvestment(): bool
+    {
+        return $this->type === 'investment';
+    }
+
+    public static function getMonthlyTrend($userId, $months = 6)
+    {
+        $startDate = Carbon::now()->subMonths($months)->startOfMonth();
+        
+        return self::forUser($userId)
+            ->where('transaction_date', '>=', $startDate)
+            ->selectRaw("
+                DATE_FORMAT(transaction_date, '%Y-%m') as month,
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                SUM(CASE WHEN type = 'expense' THEN ABS(amount) ELSE 0 END) as expense
+            ")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+
+    public static function getExpenseByCategory($userId, $startDate = null, $endDate = null)
+    {
+        $query = self::forUser($userId)
+            ->expense()
+            ->with('category')
+            ->selectRaw('category_id, SUM(ABS(amount)) as total')
+            ->groupBy('category_id')
+            ->orderBy('total', 'desc');
+
+        if ($startDate) $query->where('transaction_date', '>=', $startDate);
+        if ($endDate) $query->where('transaction_date', '<=', $endDate);
+
+        return $query->get();
     }
 }

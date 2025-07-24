@@ -1,6 +1,5 @@
-<?php
+<?php 
 // app/Models/Category.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,19 +12,11 @@ class Category extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'name',
-        'type',
-        'color',
-        'icon',
-        'description',
-        'is_active',
-        'sort_order',
+        'name', 'icon', 'color', 'type', 'description', 'is_active', 'user_id'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'sort_order' => 'integer',
     ];
 
     // Relationships
@@ -45,19 +36,14 @@ class Category extends Model
     }
 
     // Scopes
-    public function scopeIncome($query)
-    {
-        return $query->where('type', 'income');
-    }
-
-    public function scopeExpense($query)
-    {
-        return $query->where('type', 'expense');
-    }
-
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeByType($query, $type)
+    {
+        return $query->where('type', $type);
     }
 
     public function scopeForUser($query, $userId)
@@ -65,36 +51,38 @@ class Category extends Model
         return $query->where('user_id', $userId);
     }
 
-    // Accessors
-    public function getTypeDisplayNameAttribute(): string
-    {
-        return match($this->type) {
-            'income' => 'รายรับ',
-            'expense' => 'รายจ่าย',
-            default => 'ไม่ระบุ'
-        };
-    }
-
     // Methods
-    public function getTotalAmount($month = null, $year = null): float
+    public function getTotalTransactions($startDate = null, $endDate = null)
     {
         $query = $this->transactions();
         
-        if ($month && $year) {
-            $query->whereMonth('transaction_date', $month)
-                  ->whereYear('transaction_date', $year);
-        }
+        if ($startDate) $query->where('transaction_date', '>=', $startDate);
+        if ($endDate) $query->where('transaction_date', '<=', $endDate);
         
         return $query->sum('amount');
     }
 
-    public function getBudgetAmount($month, $year): float
+    public static function getDefaultCategories($type = 'expense')
     {
-        $budget = $this->budgets()
-                      ->where('month', $month)
-                      ->where('year', $year)
-                      ->first();
-        
-        return $budget ? $budget->amount : 0;
+        $categories = [
+            'expense' => [
+                ['name' => 'Food & Dining', 'icon' => 'utensils', 'color' => '#ff6b6b'],
+                ['name' => 'Transportation', 'icon' => 'car', 'color' => '#4ecdc4'],
+                ['name' => 'Shopping', 'icon' => 'shopping-bag', 'color' => '#45b7d1'],
+                ['name' => 'Entertainment', 'icon' => 'film', 'color' => '#96ceb4'],
+                ['name' => 'Bills & Utilities', 'icon' => 'file-invoice', 'color' => '#feca57'],
+                ['name' => 'Healthcare', 'icon' => 'heartbeat', 'color' => '#ff9ff3'],
+                ['name' => 'Education', 'icon' => 'graduation-cap', 'color' => '#54a0ff'],
+            ],
+            'income' => [
+                ['name' => 'Salary', 'icon' => 'money-bill-wave', 'color' => '#2ecc71'],
+                ['name' => 'Freelance', 'icon' => 'laptop', 'color' => '#3498db'],
+                ['name' => 'Investment', 'icon' => 'chart-line', 'color' => '#9b59b6'],
+                ['name' => 'Gift', 'icon' => 'gift', 'color' => '#e74c3c'],
+                ['name' => 'Other Income', 'icon' => 'plus-circle', 'color' => '#f39c12'],
+            ]
+        ];
+
+        return $categories[$type] ?? [];
     }
 }

@@ -1,30 +1,27 @@
 <?php
 // app/Models/Budget.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 class Budget extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'category_id',
-        'amount',
-        'month',
-        'year',
-        'notes',
-        'is_active',
+        'name', 'amount', 'spent', 'period', 'start_date', 'end_date',
+        'category_id', 'user_id', 'alert_enabled', 'alert_percentage', 'is_active'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'month' => 'integer',
-        'year' => 'integer',
+        'spent' => 'decimal:2',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'alert_enabled' => 'boolean',
         'is_active' => 'boolean',
     ];
 
@@ -40,39 +37,51 @@ class Budget extends Model
     }
 
     // Accessors
-    public function getFormattedAmountAttribute(): string
+    public function getPercentageAttribute()
     {
-        return number_format($this->amount, 2);
+        return $this->amount > 0 ? ($this->spent / $this->amount) * 100 : 0;
     }
 
-    public function getMonthNameAttribute(): string
+    public function getRemainingAttribute()
     {
-        return Carbon::create()->month($this->month)->format('F');
+        return $this->amount - $this->spent;
+    }
+
+    public function getDaysRemainingAttribute()
+    {
+        return Carbon::now()->diffInDays($this->end_date, false);
     }
 
     // Methods
-    public function getSpentAmount(): float
+    public function updateSpent()
     {
-        return $this->category->transactions()
-                    ->where('type', 'expense')
-                    ->whereMonth('transaction_date', $this->month)
-                    ->whereYear('transaction_date', $this->year)
-                    ->sum('amount');
-    }
-
-    public function getRemainingAmount(): float
-    {
-        return $this->amount - $this->getSpentAmount();
-    }
-
-    public function getUsagePercentage(): float
-    {
-        if ($this->amount == 0) return 0;
-        return ($this->getSpentAmount() / $this->amount) * 100;
+        $this->spent = Transaction::forUser($this->user_id)
+            ->where('category_id', $this->category_id)
+            ->expense()
+            ->whereBetween('transaction_date', [$this->start_date, $this->end_date])
+            ->sum('amount');
+        
+        $this->save();
+        
+        return $this;
     }
 
     public function isOverBudget(): bool
     {
-        return $this->getSpentAmount() > $this->amount;
+        return $this->spent > $this->amount;
+    }
+
+    public function shouldAlert(): bool
+    {
+        return $this->alert_enabled && $this->percentage >= $this->alert_percentage;
+    }
+
+    public function getStatusColor(): string
+    {
+        $percentage = $this->percentage;
+        
+        if ($percentage >= 100) return 'danger';
+        if ($percentage >= $this->alert_percentage) return 'warning';
+        return 'success';
     }
 }

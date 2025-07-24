@@ -12,10 +12,15 @@ Route::get('/hello', function () {
     return view('hello');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    $hasFinancialData = \App\Models\Transaction::where('user_id', $user->id)->exists();
+    return view('dashboard', compact('hasFinancialData'));
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
