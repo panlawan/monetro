@@ -83,7 +83,7 @@
                                 <th>Category</th>
                                 <th>Type</th>
                                 <th class="text-end">Amount</th>
-                                <th>Actions</th>
+                                <th width="120">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -127,11 +127,13 @@
                                             <button class="btn btn-outline-primary btn-sm" 
                                                     onclick="editTransaction({{ $transaction->id }})"
                                                     data-bs-toggle="modal" 
-                                                    data-bs-target="#editTransactionModal">
+                                                    data-bs-target="#editTransactionModal"
+                                                    title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button class="btn btn-outline-danger btn-sm" 
-                                                    onclick="deleteTransaction({{ $transaction->id }})">
+                                                    onclick="deleteTransaction({{ $transaction->id }})"
+                                                    title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -221,6 +223,64 @@
         </div>
     </div>
 
+    <!-- Edit Transaction Modal -->
+    <div class="modal fade" id="editTransactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editTransactionForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label class="form-label">Type</label>
+                                <select name="type" class="form-select" required id="editTransactionType">
+                                    <option value="">Select Type</option>
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Category</label>
+                                <select name="category_id" class="form-select" required id="editCategorySelect">
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="description" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="transaction_date" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Notes (Optional)</label>
+                            <textarea name="notes" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Transaction</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Categories data
@@ -229,6 +289,11 @@
         // Update categories for add modal
         document.getElementById('transactionType').addEventListener('change', function() {
             updateCategoryOptions('categorySelect', this.value);
+        });
+        
+        // Update categories for edit modal
+        document.getElementById('editTransactionType').addEventListener('change', function() {
+            updateCategoryOptions('editCategorySelect', this.value);
         });
         
         function updateCategoryOptions(selectId, type) {
@@ -274,7 +339,67 @@
                 alert('Error adding transaction');
             });
         });
+
+        // Handle Edit Transaction Form
+        document.getElementById('editTransactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating transaction: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating transaction');
+            });
+        });
     });
+
+    // Edit transaction function
+    function editTransaction(id) {
+        fetch(`/finance/transactions/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Populate edit form
+            const form = document.getElementById('editTransactionForm');
+            form.action = `/finance/transactions/${data.id}`;
+            
+            document.getElementById('editTransactionType').value = data.type;
+            document.getElementById('editTransactionType').dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+                document.getElementById('editCategorySelect').value = data.category_id;
+                form.querySelector('[name="amount"]').value = data.amount;
+                form.querySelector('[name="description"]').value = data.description;
+                form.querySelector('[name="transaction_date"]').value = data.transaction_date;
+                form.querySelector('[name="notes"]').value = data.notes || '';
+            }, 100);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading transaction data');
+        });
+    }
 
     // Delete transaction function
     function deleteTransaction(id) {

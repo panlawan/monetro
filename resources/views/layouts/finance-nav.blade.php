@@ -12,8 +12,11 @@
             </a>
             <a class="nav-link {{ request()->routeIs('finance.goals*') ? 'active fw-bold' : '' }}" 
                href="{{ route('finance.goals') }}">
-                <i class="fas fa-target me-1"></i>Goals
+                <i class="fas fa-flag me-1"></i>Goals
             </a>
+
+<!-- <i class="fa-regular fa-flag"></i> -->
+            <!-- <i class="fa-solid fa-flag-pennant"></i> -->
             <a class="nav-link {{ request()->routeIs('finance.budgets*') ? 'active fw-bold' : '' }}" 
                href="{{ route('finance.budgets') }}">
                 <i class="fas fa-chart-pie me-1"></i>Budgets

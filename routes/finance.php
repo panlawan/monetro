@@ -1,37 +1,58 @@
 <?php
-// routes/finance.php
-
+// routes/finance.php - เวอร์ชันที่แก้ไขแล้ว
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\GoalController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AssetController;
+use App\Http\Controllers\TransferController;
+use App\Http\Controllers\InvestmentController;
 use Illuminate\Support\Facades\Route;
 
-// Finance Dashboard Routes - ใส่ middleware ที่ route แทน
 Route::middleware(['auth', 'verified'])->prefix('finance')->name('finance.')->group(function () {
     
-    // Main Finance Dashboard
+    // Main Dashboard
     Route::get('/', [FinanceController::class, 'dashboard'])->name('dashboard');
-    Route::get('/dashboard', [FinanceController::class, 'dashboard'])->name('dashboard');
+    
+    // Accounts Management
+    Route::resource('accounts', AccountController::class);
+    
+    // Assets Management
+    Route::resource('assets', AssetController::class);
     
     // Transactions
     Route::get('/transactions', [FinanceController::class, 'transactions'])->name('transactions');
-    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
-    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
-    Route::put('/transactions/{transaction}', [TransactionController::class, 'update'])->name('transactions.update');
-    Route::delete('/transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+    Route::resource('transactions', TransactionController::class)->except(['index']);
     
-    // Goals
-    Route::get('/goals', [FinanceController::class, 'goals'])->name('goals');
-    Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
-    Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');
-    Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
-    Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
-    Route::post('/goals/{goal}/progress', [GoalController::class, 'addProgress'])->name('goals.progress');
-    Route::post('/goals/{goal}/complete', [GoalController::class, 'markCompleted'])->name('goals.complete');
+    // Transfers
+    Route::get('/transfers/create', [TransferController::class, 'create'])->name('transfers.create');
+    Route::post('/transfers', [TransferController::class, 'store'])->name('transfers.store');
     
-    // Budgets
+    // Investment Management
+    Route::prefix('investments')->name('investments.')->group(function () {
+        Route::get('/', [InvestmentController::class, 'index'])->name('index');
+        Route::get('/buy', [InvestmentController::class, 'buy'])->name('buy');
+        Route::post('/buy', [InvestmentController::class, 'storeBuy'])->name('store-buy');
+        Route::get('/sell', [InvestmentController::class, 'sell'])->name('sell');
+        Route::post('/sell', [InvestmentController::class, 'storeSell'])->name('store-sell');
+        Route::get('/dividend', [InvestmentController::class, 'dividend'])->name('dividend');
+        Route::post('/dividend', [InvestmentController::class, 'storeDividend'])->name('store-dividend');
+    });
+    
+    // Budgets (เดิม)
     Route::get('/budgets', [FinanceController::class, 'budgets'])->name('budgets');
+    
+    // Goals (เดิม)
+    Route::get('/goals', [FinanceController::class, 'goals'])->name('goals');
     
     // Reports
     Route::get('/reports', [FinanceController::class, 'reports'])->name('reports');
+    Route::get('/net-worth', [FinanceController::class, 'netWorth'])->name('net-worth');
+    
+    // API Routes for AJAX
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('/accounts/{account}/balance', [AccountController::class, 'getBalance']);
+        Route::post('/accounts/{account}/update-balance', [AccountController::class, 'updateBalance']);
+        Route::get('/assets/{asset}/current-price', [AssetController::class, 'getCurrentPrice']);
+        Route::post('/assets/{asset}/update-value', [AssetController::class, 'updateValue']);
+    });
 });
