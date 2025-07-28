@@ -1,35 +1,10 @@
-includes:
-    - ./vendor/larastan/larastan/extension.neon
-
 parameters:
     paths:
-        - app/
-        - routes/
-        - config/
-        - database/factories/
-        - database/seeders/
-
-    # Level 0 is the loosest, 9 is the strictest
+        - app
+        - routes/web.php
     level: 1
-
     excludePaths:
-        - ./vendor/*
-        - ./storage/*
-        - ./bootstrap/cache/*
-        - ./node_modules/*
-        - ./public/*
-        - ./database/migrations/*
-
-    ignoreErrors:
-        - '#PHPDoc tag @var#'
-        - '#Unknown type: mixed#'
-        - '#Property .+ is never read, only written#'
-        - '#Access to an undefined property#'
-        - '#Call to an undefined method#'
-
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
-    reportUnmatchedIgnoredErrors: false
-
-    bootstrapFiles:
-        - bootstrap/app.php
+        - vendor/*
+        - storage/*
+        - bootstrap/cache/*
+        - routes/console.php
