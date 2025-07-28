@@ -1,0 +1,24 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - routes/
+    
+    level: 1
+    
+    excludePaths:
+        - ./vendor/*
+        - ./storage/*
+        - ./bootstrap/cache/*
+        - ./node_modules/*
+    
+    ignoreErrors:
+        - '#PHPDoc tag @var#'
+        - '#Unknown type: mixed#'
+        - '#Property .+ is never read, only written#'
+    
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
