@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,10 +13,10 @@ Route::get('/health', function () {
     try {
         // Check database connection
         DB::connection()->getPdo();
-        
+
         // Check Redis connection
         Cache::store('redis')->put('health_check', 'ok', 60);
-        
+
         return response()->json([
             'status' => 'healthy',
             'timestamp' => now(),
