@@ -1,0 +1,147 @@
+name: Laravel CI/CD
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  PHP_VERSION: 8.2
+  NODE_VERSION: 18
+
+jobs:
+  # Code Quality & Security
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality & Security
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ env.PHP_VERSION }}
+        extensions: mbstring, pdo, pdo_mysql, zip, gd, curl, redis
+        tools: composer, phpstan, php-cs-fixer
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.composer/cache
+        key: composer-${{ hashFiles('**/composer.lock') }}
+
+    - name: Install Composer dependencies
+      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: PHP Code Style (Laravel Pint)
+      run: ./vendor/bin/pint --test
+
+    - name: Static Analysis (PHPStan)
+      run: ./vendor/bin/phpstan analyse --memory-limit=2G
+
+    - name: Security Audit
+      run: composer audit
+
+  # Testing Suite
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+    needs: code-quality
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: laravel_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ env.PHP_VERSION }}
+        extensions: mbstring, pdo, pdo_mysql, zip, gd, curl, redis
+        coverage: xdebug
+
+    - name: Install dependencies
+      run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Node dependencies & Build
+      run: |
+        npm ci
+        npm run build
+
+    - name: Prepare Laravel
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+        chmod -R 755 storage bootstrap/cache
+
+    - name: Run Tests
+      run: php artisan test --coverage
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: laravel_test
+        DB_USERNAME: root
+        DB_PASSWORD: secret
+
+  # Deploy to Production
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    needs: [code-quality, test]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Production Server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        script: |
+          cd /var/www/production
+          
+          # Enable maintenance mode
+          docker-compose exec -T app php artisan down --retry=60
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Update containers
+          docker-compose up -d --force-recreate
+          
+          # Run Laravel commands
+          docker-compose exec -T app php artisan migrate --force
+          docker-compose exec -T app php artisan optimize
+          docker-compose exec -T app php artisan queue:restart
+          
+          # Disable maintenance mode
+          docker-compose exec -T app php artisan up

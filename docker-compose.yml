@@ -1,0 +1,133 @@
+services:
+  # PHP Application
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    container_name: monetro_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    user: "1000:1000"
+    volumes:
+      - ./:/var/www/html:cached
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - laravel
+    environment:
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: monetro_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./:/var/www/html:cached
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: monetro_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE: monetro
+      MYSQL_USER: monetro
+      MYSQL_PASSWORD: secret
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis Cache
+  redis:
+    image: redis:alpine
+    container_name: monetro_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - laravel
+
+  # Composer
+  composer:
+    image: composer:latest
+    container_name: monetro_composer
+    volumes:
+      - ./:/app:cached
+    working_dir: /app
+    user: "1000:1000"
+    entrypoint: ['composer', '--ignore-platform-reqs']
+    networks:
+      - laravel
+
+  # Node.js for Frontend  
+  node:
+    image: node:18-alpine
+    container_name: monetro_node
+    working_dir: /var/www/html
+    user: "1000:1000"
+    volumes:
+      - ./:/var/www/html:cached
+    ports:
+      - "5173:5173"
+    networks:
+      - laravel
+
+  # PHPMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: monetro_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+  # Mailhog for Email Testing
+  mailhog:
+    image: mailhog/mailhog
+    container_name: monetro_mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - laravel
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  laravel:
+    driver: bridge
