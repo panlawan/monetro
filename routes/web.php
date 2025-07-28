@@ -11,21 +11,21 @@ Route::get('/health', function () {
     try {
         // Check database connection
         DB::connection()->getPdo();
-        
+
         // Check Redis connection
         Cache::store('redis')->put('health_check', 'ok', 60);
-        
+
         return response()->json([
             'status' => 'healthy',
             'timestamp' => now(),
             'database' => 'connected',
-            'redis' => 'connected'
+            'redis' => 'connected',
         ], 200);
     } catch (Exception $e) {
         return response()->json([
             'status' => 'unhealthy',
             'error' => $e->getMessage(),
-            'timestamp' => now()
+            'timestamp' => now(),
         ], 503);
     }
 });
