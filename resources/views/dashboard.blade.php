@@ -48,9 +48,9 @@
                                 <p class="text-sm font-medium text-gray-500">สถานะบัญชี</p>
                                 <p class="text-lg font-semibold text-gray-900">
                                     @if(auth()->user()->email_verified_at)
-                                        ยืนยันแล้ว
+                                        ✅ ยืนยันแล้ว
                                     @else
-                                        รอยืนยัน
+                                        ⚠️ รอยืนยัน
                                     @endif
                                 </p>
                             </div>
