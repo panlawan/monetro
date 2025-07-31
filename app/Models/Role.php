@@ -1,11 +1,11 @@
 <?php
-
 // app/Models/Role.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends Model
 {
@@ -16,7 +16,7 @@ class Role extends Model
         'display_name',
         'description',
         'permissions',
-        'is_active',
+        'is_active'
     ];
 
     protected function casts(): array
@@ -27,10 +27,11 @@ class Role extends Model
         ];
     }
 
-    public function users()
+    // 🔧 เพิ่ม return type
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_roles')
-            ->withPivot('assigned_at', 'assigned_by', 'expires_at')
-            ->withTimestamps();
+                    ->withPivot('assigned_at', 'assigned_by', 'expires_at')
+                    ->withTimestamps();
     }
 }

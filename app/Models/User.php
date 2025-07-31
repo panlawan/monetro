@@ -1,13 +1,13 @@
 <?php
-
 // app/Models/User.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -38,31 +38,31 @@ class User extends Authenticatable
         ];
     }
 
-    // Relationships
-    public function roles()
+    // 🔧 เพิ่ม return type เพื่อให้ PHPStan เข้าใจ
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles')
-            ->withPivot('assigned_at', 'assigned_by', 'expires_at')
-            ->withTimestamps();
+                    ->withPivot('assigned_at', 'assigned_by', 'expires_at')
+                    ->withTimestamps();
     }
 
     // Helper Methods
-    public function hasRole($roleName)
+    public function hasRole(string $roleName): bool
     {
         return $this->roles()->where('name', $roleName)->exists();
     }
 
-    public function hasAnyRole(array $roles)
+    public function hasAnyRole(array $roles): bool
     {
         return $this->roles()->whereIn('name', $roles)->exists();
     }
 
-    public function hasPermission($permission)
+    public function hasPermission(string $permission): bool
     {
         return $this->roles()->where('is_active', true)
-            ->get()
-            ->pluck('permissions')
-            ->flatten()
-            ->contains($permission);
+                    ->get()
+                    ->pluck('permissions')
+                    ->flatten()
+                    ->contains($permission);
     }
 }

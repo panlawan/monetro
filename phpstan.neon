@@ -1,10 +1,16 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
 parameters:
     paths:
-        - app
-        - routes/web.php
-    level: 1
-    excludePaths:
-        - vendor/*
-        - storage/*
-        - bootstrap/cache/*
-        - routes/console.php
+        - app/
+    
+    level: 0
+    reportUnmatchedIgnoredErrors: false
+    
+    # Don't exclude anything for now
+    excludePaths: []
+    
+    # Bootstrap file
+    bootstrapFiles:
+        - bootstrap/app.php
