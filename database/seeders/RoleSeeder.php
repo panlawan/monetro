@@ -19,34 +19,34 @@ class RoleSeeder extends Seeder
                 'permissions' => [
                     'users.create', 'users.read', 'users.update', 'users.delete',
                     'roles.create', 'roles.read', 'roles.update', 'roles.delete',
-                    'admin.access'
-                ]
+                    'admin.access',
+                ],
             ],
             [
                 'name' => 'admin',
-                'display_name' => 'Administrator', 
+                'display_name' => 'Administrator',
                 'description' => 'Administrator access',
                 'permissions' => [
                     'users.create', 'users.read', 'users.update',
-                    'admin.access'
-                ]
+                    'admin.access',
+                ],
             ],
             [
                 'name' => 'moderator',
                 'display_name' => 'Moderator',
                 'description' => 'Moderator access',
                 'permissions' => [
-                    'users.read', 'users.update'
-                ]
+                    'users.read', 'users.update',
+                ],
             ],
             [
                 'name' => 'user',
                 'display_name' => 'User',
                 'description' => 'Basic user access',
                 'permissions' => [
-                    'profile.read', 'profile.update'
-                ]
-            ]
+                    'profile.read', 'profile.update',
+                ],
+            ],
         ];
 
         foreach ($roles as $roleData) {
@@ -60,7 +60,7 @@ class RoleSeeder extends Seeder
         $firstUser = User::first();
         if ($firstUser) {
             $superAdminRole = Role::where('name', 'super_admin')->first();
-            if ($superAdminRole && !$firstUser->hasRole('super_admin')) {
+            if ($superAdminRole && ! $firstUser->hasRole('super_admin')) {
                 $firstUser->roles()->attach($superAdminRole->id, [
                     'assigned_at' => now(),
                     'assigned_by' => $firstUser->id,

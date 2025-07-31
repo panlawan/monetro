@@ -29,24 +29,25 @@ class ProfileController extends Controller
             Log::info('Profile Update Started', [
                 'user_id' => $user->id,
                 'has_file' => $request->hasFile('avatar'),
-                'old_avatar' => $user->avatar
+                'old_avatar' => $user->avatar,
             ]);
 
             // Handle avatar upload
             if ($request->hasFile('avatar')) {
                 $avatarFile = $request->file('avatar');
-                
+
                 Log::info('Avatar File Info', [
                     'original_name' => $avatarFile->getClientOriginalName(),
                     'size' => $avatarFile->getSize(),
                     'mime_type' => $avatarFile->getMimeType(),
                     'temp_path' => $avatarFile->getPathname(),
-                    'is_valid' => $avatarFile->isValid()
+                    'is_valid' => $avatarFile->isValid(),
                 ]);
 
                 // Validate file
-                if (!$avatarFile->isValid()) {
+                if (! $avatarFile->isValid()) {
                     Log::error('Invalid avatar file uploaded');
+
                     return back()->withErrors(['avatar' => 'ไฟล์ที่อัปโหลดไม่ถูกต้อง']);
                 }
 
@@ -54,10 +55,10 @@ class ProfileController extends Controller
                 if ($user->avatar) {
                     $oldPath = str_replace('avatars/', '', $user->avatar);
                     $oldPath = str_replace('storage/', '', $oldPath);
-                    $oldPath = 'avatars/' . basename($oldPath);
-                    
+                    $oldPath = 'avatars/'.basename($oldPath);
+
                     Log::info('Deleting old avatar', ['path' => $oldPath]);
-                    
+
                     if (Storage::disk('public')->exists($oldPath)) {
                         Storage::disk('public')->delete($oldPath);
                         Log::info('Old avatar deleted successfully');
@@ -66,23 +67,23 @@ class ProfileController extends Controller
 
                 // Generate unique filename
                 $extension = $avatarFile->getClientOriginalExtension();
-                $filename = 'avatar_' . $user->id . '_' . time() . '.' . $extension;
-                
+                $filename = 'avatar_'.$user->id.'_'.time().'.'.$extension;
+
                 Log::info('Storing new avatar', [
                     'filename' => $filename,
-                    'storage_path' => 'avatars/' . $filename
+                    'storage_path' => 'avatars/'.$filename,
                 ]);
 
                 // Store the file
                 $stored = $avatarFile->storeAs('avatars', $filename, 'public');
-                
+
                 if ($stored) {
                     $validatedData['avatar'] = $stored; // This will be 'avatars/filename.ext'
                     Log::info('Avatar stored successfully', [
                         'stored_path' => $stored,
-                        'full_path' => storage_path('app/public/' . $stored)
+                        'full_path' => storage_path('app/public/'.$stored),
                     ]);
-                    
+
                     // Verify file exists
                     if (Storage::disk('public')->exists($stored)) {
                         Log::info('Avatar file verified to exist');
@@ -91,6 +92,7 @@ class ProfileController extends Controller
                     }
                 } else {
                     Log::error('Failed to store avatar file');
+
                     return back()->withErrors(['avatar' => 'ไม่สามารถบันทึกไฟล์ได้']);
                 }
             }
@@ -106,7 +108,7 @@ class ProfileController extends Controller
 
             Log::info('Profile updated successfully', [
                 'user_id' => $user->id,
-                'new_avatar' => $user->avatar
+                'new_avatar' => $user->avatar,
             ]);
 
             return Redirect::route('profile.edit')->with('status', 'profile-updated');
@@ -114,10 +116,10 @@ class ProfileController extends Controller
         } catch (\Exception $e) {
             Log::error('Profile update failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
-            return back()->withErrors(['error' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'เกิดข้อผิดพลาด: '.$e->getMessage()]);
         }
     }
 

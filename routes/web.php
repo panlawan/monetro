@@ -50,18 +50,18 @@ Route::get('/test-tailwind', function () {
 require __DIR__.'/auth.php';
 
 // Debug routes (remove in production)
-Route::get('/debug/avatar/{user}', function(\App\Models\User $user) {
+Route::get('/debug/avatar/{user}', function (\App\Models\User $user) {
     return response()->json([
         'user_id' => $user->id,
         'avatar_db' => $user->avatar,
         'avatar_url' => $user->avatar_url,
         'storage_exists' => $user->avatar ? \Storage::disk('public')->exists(str_replace('storage/', '', $user->avatar)) : false,
-        'storage_path' => $user->avatar ? storage_path('app/public/' . str_replace('storage/', '', $user->avatar)) : null,
-        'public_path' => $user->avatar ? public_path('storage/' . str_replace('storage/', '', $user->avatar)) : null,
+        'storage_path' => $user->avatar ? storage_path('app/public/'.str_replace('storage/', '', $user->avatar)) : null,
+        'public_path' => $user->avatar ? public_path('storage/'.str_replace('storage/', '', $user->avatar)) : null,
     ]);
 })->middleware('auth');
 
-Route::get('/debug/storage', function() {
+Route::get('/debug/storage', function () {
     return response()->json([
         'storage_link_exists' => is_link(public_path('storage')),
         'storage_link_target' => readlink(public_path('storage')),

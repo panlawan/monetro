@@ -13,9 +13,9 @@ class UpdateLastLogin
     {
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Update last_login_at only once per session to avoid too many DB updates
-            if (!$request->session()->has('last_login_updated')) {
+            if (! $request->session()->has('last_login_updated')) {
                 $user->update(['last_login_at' => now()]);
                 $request->session()->put('last_login_updated', true);
             }

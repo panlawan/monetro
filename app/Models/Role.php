@@ -14,7 +14,7 @@ class Role extends Model
         'display_name',
         'description',
         'permissions',
-        'is_active'
+        'is_active',
     ];
 
     protected function casts(): array
@@ -29,34 +29,37 @@ class Role extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_roles')
-                    ->withPivot('assigned_at', 'assigned_by', 'expires_at')
-                    ->withTimestamps();
+            ->withPivot('assigned_at', 'assigned_by', 'expires_at')
+            ->withTimestamps();
     }
 
     // Helper Methods
     public function hasPermission($permission)
     {
         $permissions = $this->permissions ?? [];
+
         return in_array($permission, $permissions);
     }
 
     public function addPermission($permission)
     {
         $permissions = $this->permissions ?? [];
-        if (!in_array($permission, $permissions)) {
+        if (! in_array($permission, $permissions)) {
             $permissions[] = $permission;
             $this->update(['permissions' => $permissions]);
         }
+
         return $this;
     }
 
     public function removePermission($permission)
     {
         $permissions = $this->permissions ?? [];
-        $permissions = array_filter($permissions, function($p) use ($permission) {
+        $permissions = array_filter($permissions, function ($p) use ($permission) {
             return $p !== $permission;
         });
         $this->update(['permissions' => array_values($permissions)]);
+
         return $this;
     }
 }
