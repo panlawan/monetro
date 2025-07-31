@@ -1,33 +1,37 @@
 <?php
+// routes/web.php
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Health check endpoint for production monitoring
-Route::get('/health', function () {
-    try {
-        // Check database connection
-        DB::connection()->getPdo();
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+    return view('dashboard', compact('user'));
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-        // Check Redis connection
-        Cache::store('redis')->put('health_check', 'ok', 60);
-
-        return response()->json([
-            'status' => 'healthy',
-            'timestamp' => now(),
-            'database' => 'connected',
-            'redis' => 'connected',
-        ], 200);
-    } catch (Exception $e) {
-        return response()->json([
-            'status' => 'unhealthy',
-            'error' => $e->getMessage(),
-            'timestamp' => now(),
-        ], 503);
-    }
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Admin routes
+Route::middleware(['auth', 'role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    // User management (placeholder routes)
+    Route::get('users', function() { return 'User Management Coming Soon'; })->name('users.index');
+    Route::get('users/create', function() { return 'Create User Coming Soon'; })->name('users.create');
+});
+
+// Super Admin routes  
+Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('roles', function() { return 'Role Management Coming Soon'; })->name('roles.index');
+});
+
+require __DIR__.'/auth.php';
