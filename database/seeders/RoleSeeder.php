@@ -1,10 +1,11 @@
 <?php
+
 // database/seeders/RoleSeeder.php
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
@@ -31,7 +32,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Standard user access',
                 'permissions' => ['profile.read', 'profile.update'],
                 'is_active' => true,
-            ]
+            ],
         ];
 
         foreach ($roles as $role) {

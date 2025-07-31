@@ -1,13 +1,14 @@
 <?php
+
 // tests/Feature/BreezeAuthExtensionTest.php
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 class BreezeAuthExtensionTest extends TestCase
 {
@@ -30,7 +31,7 @@ class BreezeAuthExtensionTest extends TestCase
         ]);
 
         $response->assertRedirect('/dashboard');
-        
+
         $user = User::where('email', 'test@example.com')->first();
         $this->assertTrue($user->hasRole('user'));
         $this->assertAuthenticatedAs($user);
@@ -54,26 +55,25 @@ class BreezeAuthExtensionTest extends TestCase
     //     $this->assertNotNull($user->fresh()->last_login_at);
     // }
 
-    
     public function test_user_login_updates_last_login_time()
-{
-    $user = User::factory()->create([
-        'email' => 'test@example.com',
-        'password' => Hash::make('password123'),
-        'is_active' => true,
-    ]);
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+            'is_active' => true,
+        ]);
 
-    $response = $this->post('/login', [
-        'email' => 'test@example.com',
-        'password' => 'password123',
-    ]);
+        $response = $this->post('/login', [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
 
-    $response->assertRedirect('/dashboard');
-    
-    // รอสักครู่แล้วตรวจสอบอีกครั้ง
-    $this->assertNotNull($user->fresh()->last_login_at);
-    $this->assertAuthenticatedAs($user);
-}
+        $response->assertRedirect('/dashboard');
+
+        // รอสักครู่แล้วตรวจสอบอีกครั้ง
+        $this->assertNotNull($user->fresh()->last_login_at);
+        $this->assertAuthenticatedAs($user);
+    }
 
     public function test_inactive_user_cannot_login()
     {
@@ -98,7 +98,7 @@ class BreezeAuthExtensionTest extends TestCase
             'password' => Hash::make('password123'),
             'is_active' => true,
         ]);
-        
+
         $adminRole = Role::where('name', 'admin')->first();
         $user->roles()->attach($adminRole->id);
 
@@ -110,31 +110,31 @@ class BreezeAuthExtensionTest extends TestCase
         $response->assertRedirect('/admin/dashboard');
     }
 
-public function test_role_middleware_blocks_unauthorized_access()
-{
-    $user = User::factory()->create();
-    $userRole = Role::where('name', 'user')->first();
-    $user->roles()->attach($userRole->id);
+    public function test_role_middleware_blocks_unauthorized_access()
+    {
+        $user = User::factory()->create();
+        $userRole = Role::where('name', 'user')->first();
+        $user->roles()->attach($userRole->id);
 
-    $response = $this->actingAs($user)->get('/admin/dashboard');
-    
-    // รองรับทั้ง 403 และ 302
-    $this->assertContains($response->status(), [403, 302]);
-}
+        $response = $this->actingAs($user)->get('/admin/dashboard');
+
+        // รองรับทั้ง 403 และ 302
+        $this->assertContains($response->status(), [403, 302]);
+    }
 
     public function test_profile_can_be_updated_with_avatar()
     {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)
-                        ->patch('/profile', [
-                            'name' => 'Updated Name',
-                            'email' => $user->email,
-                            'phone' => '0987654321',
-                        ]);
+            ->patch('/profile', [
+                'name' => 'Updated Name',
+                'email' => $user->email,
+                'phone' => '0987654321',
+            ]);
 
         $response->assertRedirect('/profile');
-        
+
         $this->assertEquals('Updated Name', $user->fresh()->name);
         $this->assertEquals('0987654321', $user->fresh()->phone);
     }

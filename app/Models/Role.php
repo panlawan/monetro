@@ -1,4 +1,5 @@
 <?php
+
 // app/Models/Role.php
 
 namespace App\Models;
@@ -15,7 +16,7 @@ class Role extends Model
         'display_name',
         'description',
         'permissions',
-        'is_active'
+        'is_active',
     ];
 
     protected function casts(): array
@@ -29,7 +30,7 @@ class Role extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_roles')
-                    ->withPivot('assigned_at', 'assigned_by', 'expires_at')
-                    ->withTimestamps();
+            ->withPivot('assigned_at', 'assigned_by', 'expires_at')
+            ->withTimestamps();
     }
 }

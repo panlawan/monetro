@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Controllers/Admin/RoleController.php
 
 namespace App\Http\Controllers\Admin;
@@ -20,18 +21,21 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::withCount('users')->paginate(10);
+
         return view('admin.roles.index', compact('roles'));
     }
 
     public function show(Role $role)
     {
         $role->load('users');
+
         return view('admin.roles.show', compact('role'));
     }
 
     public function create()
     {
         $permissions = $this->permissions;
+
         return view('admin.roles.create', compact('permissions'));
     }
 
@@ -55,19 +59,20 @@ class RoleController extends Controller
         ]);
 
         return redirect()->route('admin.roles.index')
-                        ->with('success', 'สร้าง Role สำเร็จ');
+            ->with('success', 'สร้าง Role สำเร็จ');
     }
 
     public function edit(Role $role)
     {
         $permissions = $this->permissions;
+
         return view('admin.roles.edit', compact('role', 'permissions'));
     }
 
     public function update(Request $request, Role $role)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
+            'name' => 'required|string|max:255|unique:roles,name,'.$role->id,
             'display_name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'permissions' => 'array',
@@ -84,7 +89,7 @@ class RoleController extends Controller
         ]);
 
         return redirect()->route('admin.roles.index')
-                        ->with('success', 'อัปเดต Role สำเร็จ');
+            ->with('success', 'อัปเดต Role สำเร็จ');
     }
 
     public function destroy(Role $role)
@@ -92,13 +97,13 @@ class RoleController extends Controller
         // Prevent deleting if role has users
         if ($role->users()->count() > 0) {
             return redirect()->route('admin.roles.index')
-                            ->with('error', 'ไม่สามารถลบ Role ที่มีผู้ใช้ได้');
+                ->with('error', 'ไม่สามารถลบ Role ที่มีผู้ใช้ได้');
         }
 
         $role->delete();
 
         return redirect()->route('admin.roles.index')
-                        ->with('success', 'ลบ Role สำเร็จ');
+            ->with('success', 'ลบ Role สำเร็จ');
     }
 
     public function updatePermissions(Request $request, Role $role)
@@ -113,6 +118,6 @@ class RoleController extends Controller
         ]);
 
         return redirect()->back()
-                        ->with('success', 'อัปเดต Permissions สำเร็จ');
+            ->with('success', 'อัปเดต Permissions สำเร็จ');
     }
 }

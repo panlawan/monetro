@@ -1,12 +1,13 @@
 <?php
+
 // app/Models/User.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
@@ -41,8 +42,8 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles')
-                    ->withPivot('assigned_at', 'assigned_by', 'expires_at')
-                    ->withTimestamps();
+            ->withPivot('assigned_at', 'assigned_by', 'expires_at')
+            ->withTimestamps();
     }
 
     // Helper Methods
@@ -59,9 +60,9 @@ class User extends Authenticatable
     public function hasPermission($permission)
     {
         return $this->roles()->where('is_active', true)
-                    ->get()
-                    ->pluck('permissions')
-                    ->flatten()
-                    ->contains($permission);
+            ->get()
+            ->pluck('permissions')
+            ->flatten()
+            ->contains($permission);
     }
 }

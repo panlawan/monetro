@@ -1,4 +1,5 @@
 <?php
+
 // database/migrations/xxxx_create_user_roles_table.php
 
 use Illuminate\Database\Migrations\Migration;
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->foreignId('assigned_by')->nullable()->constrained('users');
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'role_id']);
         });
     }

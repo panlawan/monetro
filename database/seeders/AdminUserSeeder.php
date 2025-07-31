@@ -1,11 +1,12 @@
 <?php
+
 // database/seeders/AdminUserSeeder.php
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
@@ -26,7 +27,7 @@ class AdminUserSeeder extends Seeder
 
         // Assign Super Admin Role
         $superAdminRole = Role::where('name', 'super_admin')->first();
-        if ($superAdminRole && !$superAdmin->hasRole('super_admin')) {
+        if ($superAdminRole && ! $superAdmin->hasRole('super_admin')) {
             $superAdmin->roles()->attach($superAdminRole->id, [
                 'assigned_at' => now(),
                 'assigned_by' => $superAdmin->id,
@@ -47,7 +48,7 @@ class AdminUserSeeder extends Seeder
 
         // Assign Admin Role
         $adminRole = Role::where('name', 'admin')->first();
-        if ($adminRole && !$admin->hasRole('admin')) {
+        if ($adminRole && ! $admin->hasRole('admin')) {
             $admin->roles()->attach($adminRole->id, [
                 'assigned_at' => now(),
                 'assigned_by' => $superAdmin->id,

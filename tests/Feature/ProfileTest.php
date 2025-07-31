@@ -61,27 +61,27 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-public function test_user_can_delete_their_account(): void
-{
-    $user = User::factory()->create();
+    public function test_user_can_delete_their_account(): void
+    {
+        $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
-        ->delete('/profile', [
-            'password' => 'password',
-        ]);
+        $response = $this
+            ->actingAs($user)
+            ->delete('/profile', [
+                'password' => 'password',
+            ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/');
 
-    $this->assertGuest();
-    
-    // เปลี่ยนจาก assertNull เป็น assertSoftDeleted สำหรับ soft delete
-    $this->assertSoftDeleted($user);
-    // หรือใช้
-    // $this->assertNotNull($user->fresh()->deleted_at);
-}
+        $this->assertGuest();
+
+        // เปลี่ยนจาก assertNull เป็น assertSoftDeleted สำหรับ soft delete
+        $this->assertSoftDeleted($user);
+        // หรือใช้
+        // $this->assertNotNull($user->fresh()->deleted_at);
+    }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {

@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Controllers/Auth/AuthenticatedSessionController.php
 
 namespace App\Http\Controllers\Auth;
@@ -21,8 +22,8 @@ class AuthenticatedSessionController extends Controller
     {
         // Check if user is active before authentication
         $user = \App\Models\User::where('email', $request->email)->first();
-        
-        if ($user && !$user->is_active) {
+
+        if ($user && ! $user->is_active) {
             return back()->withErrors([
                 'email' => 'บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ',
             ])->onlyInput('email');
