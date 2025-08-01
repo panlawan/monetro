@@ -5,11 +5,11 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Notifications\CustomVerifyEmail;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class TestEmailCommand extends Command
 {
     protected $signature = 'test:email {--user=1}';
+
     protected $description = 'Send a test email verification to user';
 
     public function handle()
@@ -17,8 +17,9 @@ class TestEmailCommand extends Command
         $userId = $this->option('user');
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             $this->error('User not found');
+
             return;
         }
 
@@ -29,7 +30,7 @@ class TestEmailCommand extends Command
             $this->info('✅ Email sent successfully!');
             $this->info('🌐 Check Mailhog at: http://localhost:8025');
         } catch (\Exception $e) {
-            $this->error('❌ Failed to send email: ' . $e->getMessage());
+            $this->error('❌ Failed to send email: '.$e->getMessage());
         }
     }
 }

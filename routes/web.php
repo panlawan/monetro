@@ -76,7 +76,7 @@ Route::get('/debug/storage', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [App\Http\Controllers\EmailVerificationController::class, 'show'])
         ->name('verification.notice');
-    
+
     Route::post('/email/verification-notification', [App\Http\Controllers\EmailVerificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');

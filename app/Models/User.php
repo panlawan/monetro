@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Role[] $roles
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany roles()
+ * @mixin \Eloquent
+ */
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -47,8 +53,8 @@ class User extends Authenticatable implements MustVerifyEmail
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles')
-                    ->withPivot('assigned_at', 'assigned_by', 'expires_at')
-                    ->withTimestamps();
+            ->withPivot('assigned_at', 'assigned_by', 'expires_at')
+            ->withTimestamps();
     }
 
     /**
@@ -59,7 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if (is_array($roleName)) {
             return $this->roles()->whereIn('name', $roleName)->exists();
         }
-        
+
         return $this->roles()->where('name', $roleName)->exists();
     }
 
@@ -85,10 +91,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasPermission($permission)
     {
         return $this->roles()->where('is_active', true)
-                    ->get()
-                    ->pluck('permissions')
-                    ->flatten()
-                    ->contains($permission);
+            ->get()
+            ->pluck('permissions')
+            ->flatten()
+            ->contains($permission);
     }
 
     /**
@@ -97,12 +103,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function assignRole($roleName)
     {
         $role = Role::where('name', $roleName)->first();
-        if ($role && !$this->hasRole($roleName)) {
+        if ($role && ! $this->hasRole($roleName)) {
             $this->roles()->attach($role->id, [
                 'assigned_at' => now(),
                 'assigned_by' => auth()->id(),
             ]);
         }
+
         return $this;
     }
 
@@ -115,6 +122,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($role) {
             $this->roles()->detach($role->id);
         }
+
         return $this;
     }
 
@@ -125,6 +133,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $roleIds = Role::whereIn('name', $roleNames)->pluck('id')->toArray();
         $this->roles()->sync($roleIds);
+
         return $this;
     }
 
@@ -163,29 +172,31 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         \Log::info('Getting avatar URL', [
             'user_id' => $this->id,
-            'avatar_path' => $this->avatar
+            'avatar_path' => $this->avatar,
         ]);
 
         if ($this->avatar) {
             // Clean path - remove any 'storage/' prefix if exists
             $cleanPath = str_replace('storage/', '', $this->avatar);
-            
+
             // Check if file exists in storage
             if (Storage::disk('public')->exists($cleanPath)) {
-                $url = asset('storage/' . $cleanPath);
+                $url = asset('storage/'.$cleanPath);
                 \Log::info('Avatar URL generated', ['url' => $url]);
+
                 return $url;
             } else {
                 \Log::warning('Avatar file not found', [
                     'path' => $cleanPath,
-                    'full_path' => storage_path('app/public/' . $cleanPath)
+                    'full_path' => storage_path('app/public/'.$cleanPath),
                 ]);
             }
         }
-        
+
         // Default avatar using UI Avatars service
-        $defaultUrl = 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=6366f1&color=ffffff&size=200';
+        $defaultUrl = 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=6366f1&color=ffffff&size=200';
         \Log::info('Using default avatar', ['url' => $defaultUrl]);
+
         return $defaultUrl;
     }
 
@@ -227,6 +238,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function activate()
     {
         $this->update(['is_active' => true]);
+
         return $this;
     }
 
@@ -236,6 +248,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function deactivate()
     {
         $this->update(['is_active' => false]);
+
         return $this;
     }
 }
