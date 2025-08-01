@@ -127,3 +127,16 @@ Mailhog captures all outgoing emails in development:
 Happy coding! 🎉
 
 **Created with Laravel Docker Creator v2.0**
+
+
+# 1. รันคำสั่งสร้าง roles ก่อน
+php artisan db:seed --class=RoleSeeder
+
+# 2. สร้าง admin user
+php artisan db:seed --class=AdminUserSeeder
+
+# 3. ทำให้ user ID 2 เป็น super admin
+php artisan user:make-super-admin 2
+
+# หรือถ้าต้องการเก็บ roles เดิมไว้ด้วย
+php artisan user:make-super-admin 2 --keep-roles
