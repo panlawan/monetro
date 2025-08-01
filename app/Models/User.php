@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Role[] $roles
+ *
  * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany roles()
+ *
  * @mixin \Eloquent
  */
-
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
