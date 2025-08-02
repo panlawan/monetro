@@ -1,43 +1,82 @@
 <?php
-
 // app/Http/Middleware/CheckPermission.php
 
 namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckPermission
 {
-    public function handle(Request $request, Closure $next, $permission)
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
-        if (! Auth::check()) {
+        if (!auth()->check()) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Unauthorized'], 401);
+                return response()->json(['message' => 'Unauthenticated'], 401);
             }
-
             return redirect()->route('login');
         }
 
-        $user = Auth::user();
-
-        // Check if user is active
-        if (! $user->is_active) {
-            Auth::logout();
+        $user = auth()->user();
+        
+        // Check if user has the specific permission
+        if (!$user->hasPermission($permission)) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Account disabled'], 403);
+                return response()->json([
+                    'message' => 'Insufficient permissions',
+                    'required_permission' => $permission
+                ], 403);
             }
-
-            return redirect()->route('login')->with('error', 'บัญชีของคุณถูกปิดใช้งาน');
+            
+            abort(403, 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
         }
 
-        // Check permission
-        if (! $user->hasPermission($permission)) {
+        return $next($request);
+    }
+}
+
+// app/Http/Middleware/CheckRole.php (Enhanced version)
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CheckRole
+{
+    public function handle(Request $request, Closure $next, string $roles): Response
+    {
+        if (!auth()->check()) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Permission denied'], 403);
+                return response()->json(['message' => 'Unauthenticated'], 401);
             }
-            abort(403, 'คุณไม่มีสิทธิ์ดำเนินการนี้');
+            return redirect()->route('login');
+        }
+
+        $user = auth()->user();
+        $allowedRoles = explode(',', $roles);
+        
+        // Check if user has any of the required roles
+        $hasRole = false;
+        foreach ($allowedRoles as $role) {
+            if ($user->hasRole(trim($role))) {
+                $hasRole = true;
+                break;
+            }
+        }
+
+        if (!$hasRole) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Insufficient role access',
+                    'required_roles' => $allowedRoles,
+                    'user_roles' => $user->roles->pluck('name')->toArray()
+                ], 403);
+            }
+            
+            abort(403, 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้');
         }
 
         return $next($request);

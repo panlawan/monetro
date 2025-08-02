@@ -1,3 +1,4 @@
+{{-- resources/views/layouts/app.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -11,6 +12,9 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -19,18 +23,37 @@
             @include('layouts.navigation')
 
             <!-- Page Heading -->
-            @isset($header)
+            @if (isset($header))
                 <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
-            @endisset
+            @endif
 
             <!-- Page Content -->
             <main>
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- Global JavaScript for Admin Functions -->
+        <script>
+            // Set up CSRF token for all AJAX requests
+            window.Laravel = {
+                csrfToken: '{{ csrf_token() }}'
+            };
+
+            // Setup CSRF for fetch requests
+            function setupCSRF() {
+                const token = document.querySelector('meta[name="csrf-token"]');
+                if (token) {
+                    window.Laravel.csrfToken = token.getAttribute('content');
+                }
+            }
+
+            // Initialize CSRF on page load
+            document.addEventListener('DOMContentLoaded', setupCSRF);
+        </script>
     </body>
 </html>

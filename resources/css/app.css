@@ -1,9 +1,89 @@
+/* resources/css/app.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer components {
+    /* Base Button */
     .btn {
         @apply inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    /* Button Variants */
+    .btn-primary {
+        @apply bg-blue-600 hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:ring-blue-500;
+    }
+
+    .btn-secondary {
+        @apply bg-gray-600 hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:ring-gray-500;
+    }
+
+    .btn-success {
+        @apply bg-green-600 hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:ring-green-500;
+    }
+
+    .btn-danger {
+        @apply bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:ring-red-500;
+    }
+
+    .btn-warning {
+        @apply bg-yellow-600 hover:bg-yellow-700 focus:bg-yellow-700 active:bg-yellow-900 focus:ring-yellow-500;
+    }
+
+    .btn-info {
+        @apply bg-cyan-600 hover:bg-cyan-700 focus:bg-cyan-700 active:bg-cyan-900 focus:ring-cyan-500;
+    }
+
+    /* Button Sizes */
+    .btn-sm {
+        @apply px-3 py-1.5 text-xs;
+    }
+
+    .btn-md {
+        @apply px-4 py-2 text-sm;
+    }
+
+    .btn-lg {
+        @apply px-6 py-3 text-base;
+    }
+
+    .btn-xl {
+        @apply px-8 py-4 text-lg;
+    }
+
+    /* Outline Buttons */
+    .btn-outline {
+        @apply bg-transparent border-2 text-gray-600 hover:bg-gray-50 focus:bg-gray-50 active:bg-gray-100;
+    }
+
+    .btn-outline-primary {
+        @apply bg-transparent border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white focus:ring-blue-500;
+    }
+
+    .btn-outline-secondary {
+        @apply bg-transparent border-2 border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white focus:bg-gray-600 focus:text-white focus:ring-gray-500;
+    }
+
+    /* Icon Buttons */
+    .btn-icon {
+        @apply p-2 rounded-full;
+    }
+
+    .btn-icon-sm {
+        @apply p-1.5 rounded-full;
+    }
+
+    .btn-icon-lg {
+        @apply p-3 rounded-full;
+    }
+
+    /* Search specific buttons */
+    .btn-search {
+        @apply btn btn-primary btn-md;
+    }
+
+    .btn-reset {
+        @apply btn btn-secondary btn-md;
     }
 }

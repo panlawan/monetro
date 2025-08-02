@@ -3,6 +3,16 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard') }}
         </h2>
+        {{-- Impersonating Notice --}}
+            @if(session()->has('impersonator'))
+                <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 flex justify-between items-center">
+                    <span>🎭 คุณกำลังปลอมตัวเป็น {{ auth()->user()->name }}</span>
+                    <a href="{{ route('stop-impersonating') }}" 
+                    class="btn btn-warning btn-sm">
+                        หยุดการปลอมตัว
+                    </a>
+                </div>
+            @endif
     </x-slot>
 
     <div class="py-12">
