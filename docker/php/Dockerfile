@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     netcat-traditional \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
