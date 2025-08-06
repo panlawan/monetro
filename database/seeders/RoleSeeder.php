@@ -1,10 +1,11 @@
 <?php
+
 // database/seeders/RoleSeeder.php
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
@@ -19,50 +20,50 @@ class RoleSeeder extends Seeder
                     // User Management
                     'users.create', 'users.read', 'users.update', 'users.delete',
                     'users.activate', 'users.deactivate', 'users.assign-roles',
-                    
-                    // Role Management  
+
+                    // Role Management
                     'roles.create', 'roles.read', 'roles.update', 'roles.delete',
                     'roles.assign-permissions',
-                    
+
                     // Content Management
                     'content.create', 'content.read', 'content.update', 'content.delete',
                     'content.publish', 'content.unpublish',
-                    
+
                     // System Settings
                     'settings.read', 'settings.update', 'settings.backup', 'settings.restore',
-                    
+
                     // Reports & Analytics
                     'reports.read', 'reports.create', 'reports.export',
-                    
+
                     // System Administration
                     'system.logs', 'system.maintenance', 'system.cache-clear', 'system.queue-monitor',
-                    
+
                     // Profile Management
-                    'profile.read', 'profile.update'
+                    'profile.read', 'profile.update',
                 ],
                 'is_active' => true,
             ],
             [
                 'name' => 'admin',
-                'display_name' => 'Administrator', 
+                'display_name' => 'Administrator',
                 'description' => 'Administrator access with user and content management',
                 'permissions' => [
                     // User Management (Limited)
-                    'users.create', 'users.read', 'users.update', 
+                    'users.create', 'users.read', 'users.update',
                     'users.activate', 'users.deactivate',
-                    
+
                     // Content Management
                     'content.create', 'content.read', 'content.update', 'content.delete',
                     'content.publish',
-                    
+
                     // Basic Settings
                     'settings.read',
-                    
+
                     // Reports
                     'reports.read', 'reports.create',
-                    
+
                     // Profile Management
-                    'profile.read', 'profile.update'
+                    'profile.read', 'profile.update',
                 ],
                 'is_active' => true,
             ],
@@ -73,16 +74,16 @@ class RoleSeeder extends Seeder
                 'permissions' => [
                     // Limited User Management
                     'users.read', 'users.update',
-                    
+
                     // Content Moderation
-                    'content.read', 'content.update', 
+                    'content.read', 'content.update',
                     'content.publish', 'content.unpublish',
-                    
+
                     // Basic Reports
                     'reports.read',
-                    
+
                     // Profile Management
-                    'profile.read', 'profile.update'
+                    'profile.read', 'profile.update',
                 ],
                 'is_active' => true,
             ],
@@ -93,12 +94,12 @@ class RoleSeeder extends Seeder
                 'permissions' => [
                     // Basic Profile Access
                     'profile.read', 'profile.update',
-                    
+
                     // Basic Content (own content only)
-                    'content.read', 'content.create'
+                    'content.read', 'content.create',
                 ],
                 'is_active' => true,
-            ]
+            ],
         ];
 
         foreach ($roles as $roleData) {
@@ -106,8 +107,8 @@ class RoleSeeder extends Seeder
                 ['name' => $roleData['name']],
                 $roleData
             );
-            
-            $this->command->info("✅ Role '{$roleData['display_name']}' created/updated with " . count($roleData['permissions']) . " permissions");
+
+            $this->command->info("✅ Role '{$roleData['display_name']}' created/updated with ".count($roleData['permissions']).' permissions');
         }
     }
 }

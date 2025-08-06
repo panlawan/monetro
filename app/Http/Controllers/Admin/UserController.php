@@ -1,16 +1,17 @@
 <?php
+
 // app/Http/Controllers/Admin/UserController.php
 
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -25,25 +26,25 @@ class UserController extends Controller
             'role' => $request->get('role'),
             'status' => $request->get('status'),
             'sort' => $request->get('sort'),
-            'direction' => $request->get('direction')
+            'direction' => $request->get('direction'),
         ]);
 
         // Search functionality - แก้ไขให้ทำงานได้
         if ($request->filled('search')) {
             $searchTerm = trim($request->search);
-            Log::info('Searching for: ' . $searchTerm);
+            Log::info('Searching for: '.$searchTerm);
 
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', '%' . $searchTerm . '%')
-                    ->orWhere('email', 'LIKE', '%' . $searchTerm . '%')
-                    ->orWhere('phone', 'LIKE', '%' . $searchTerm . '%');
+                $q->where('name', 'LIKE', '%'.$searchTerm.'%')
+                    ->orWhere('email', 'LIKE', '%'.$searchTerm.'%')
+                    ->orWhere('phone', 'LIKE', '%'.$searchTerm.'%');
             });
         }
 
         // Filter by role - แก้ไขให้ทำงานได้
         if ($request->filled('role')) {
             $roleName = $request->role;
-            Log::info('Filtering by role: ' . $roleName);
+            Log::info('Filtering by role: '.$roleName);
 
             $query->whereHas('roles', function ($q) use ($roleName) {
                 $q->where('name', $roleName);
@@ -53,14 +54,14 @@ class UserController extends Controller
         // Filter by status - แก้ไขให้ทำงานได้
         if ($request->has('status') && $request->status !== '' && $request->status !== null) {
             $status = (bool) $request->status;
-            Log::info('Filtering by status: ' . ($status ? 'active' : 'inactive'));
+            Log::info('Filtering by status: '.($status ? 'active' : 'inactive'));
 
             $query->where('is_active', $status);
         }
 
         // Debug: Count total before sorting
         $totalBeforeSort = $query->count();
-        Log::info('Total users before sort: ' . $totalBeforeSort);
+        Log::info('Total users before sort: '.$totalBeforeSort);
 
         // Sorting - เพิ่มการเรียงลำดับ
         $sortField = $request->get('sort', 'created_at');
@@ -75,14 +76,14 @@ class UserController extends Controller
         }
 
         // Debug: Log final SQL query
-        Log::info('Final SQL query: ' . $query->toSql());
+        Log::info('Final SQL query: '.$query->toSql());
         Log::info('Query bindings: ', $query->getBindings());
 
         // Paginate with query string
         $users = $query->paginate(15)->withQueryString();
 
         // Debug: Count final results
-        Log::info('Final result count: ' . $users->total());
+        Log::info('Final result count: '.$users->total());
 
         $roles = Role::where('is_active', true)->get();
 
@@ -92,12 +93,14 @@ class UserController extends Controller
     public function show(User $user)
     {
         $user->load('roles');
+
         return view('admin.users.show', compact('user'));
     }
 
     public function create()
     {
         $roles = Role::where('is_active', true)->get();
+
         return view('admin.users.create', compact('roles'));
     }
 
@@ -262,15 +265,15 @@ class UserController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'is_active' => $user->is_active
-                ]
+                    'is_active' => $user->is_active,
+                ],
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to activate user {$user->id}: " . $e->getMessage());
+            Log::error("Failed to activate user {$user->id}: ".$e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'เกิดข้อผิดพลาดในการเปิดใช้งานบัญชี'
+                'message' => 'เกิดข้อผิดพลาดในการเปิดใช้งานบัญชี',
             ], 500);
         }
     }
@@ -283,7 +286,7 @@ class UserController extends Controller
         if ($user->id === auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'คุณไม่สามารถปิดใช้งานบัญชีของตัวเองได้'
+                'message' => 'คุณไม่สามารถปิดใช้งานบัญชีของตัวเองได้',
             ], 400);
         }
 
@@ -298,15 +301,15 @@ class UserController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'is_active' => $user->is_active
-                ]
+                    'is_active' => $user->is_active,
+                ],
             ]);
         } catch (\Exception $e) {
-            Log::error("Failed to deactivate user {$user->id}: " . $e->getMessage());
+            Log::error("Failed to deactivate user {$user->id}: ".$e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'เกิดข้อผิดพลาดในการปิดใช้งานบัญชี'
+                'message' => 'เกิดข้อผิดพลาดในการปิดใช้งานบัญชี',
             ], 500);
         }
     }
@@ -322,7 +325,7 @@ class UserController extends Controller
         if ($user->id === auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'คุณไม่สามารถแก้ไขบทบาทของตัวเองได้'
+                'message' => 'คุณไม่สามารถแก้ไขบทบาทของตัวเองได้',
             ], 400);
         }
 
@@ -340,7 +343,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'อัปเดตบทบาทเรียบร้อยแล้ว',
-            'roles' => $user->fresh()->roles
+            'roles' => $user->fresh()->roles,
         ]);
     }
 
@@ -386,14 +389,14 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => $message,
-            'count' => $count
+            'count' => $count,
         ]);
     }
 
     public function impersonate(User $user)
     {
         // Only super admin can impersonate
-        if (!auth()->user()->hasRole('super_admin')) {
+        if (! auth()->user()->hasRole('super_admin')) {
             abort(403, 'ไม่มีสิทธิ์ในการใช้ฟีเจอร์นี้');
         }
 
@@ -415,14 +418,14 @@ class UserController extends Controller
     public function stopImpersonating(Request $request)
     {
 
-        if (!session()->has('impersonator')) {
+        if (! session()->has('impersonator')) {
             return redirect()->route('dashboard')->with('error', 'คุณไม่ได้อยู่ในสถานะปลอมตัว');
         }
 
         Log::info('Stop impersonating called', [
             'session_data' => session()->all(),
             'current_user' => auth()->id(),
-            'has_impersonator' => session()->has('impersonator')
+            'has_impersonator' => session()->has('impersonator'),
         ]);
 
         if (session()->has('impersonator')) {
@@ -440,7 +443,7 @@ class UserController extends Controller
 
                 Log::info('Successfully stopped impersonating', [
                     'original_user_id' => $originalUserId,
-                    'current_user_id' => auth()->id()
+                    'current_user_id' => auth()->id(),
                 ]);
 
                 return redirect()->route('admin.users.index')
@@ -450,6 +453,7 @@ class UserController extends Controller
 
                 // ถ้าหา original user ไม่เจอ ให้ logout
                 auth()->logout();
+
                 return redirect()->route('login')
                     ->with('error', 'เกิดข้อผิดพลาด กรุณาเข้าสู่ระบบใหม่');
             }

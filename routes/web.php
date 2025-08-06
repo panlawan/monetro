@@ -1,11 +1,12 @@
 <?php
+
 // routes/web.php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\RoleController as AdminRoleController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\RoleController as AdminRoleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,6 +14,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
+
     return view('dashboard', compact('user'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -35,22 +37,22 @@ Route::middleware('auth')->group(function () {
 // Admin routes
 Route::middleware(['auth', 'role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    
+
     // User management routes
     Route::resource('users', AdminUserController::class);
-    
+
     // Additional user management routes
     Route::put('users/{user}/activate', [AdminUserController::class, 'activate'])->name('users.activate');
     Route::put('users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->name('users.deactivate');
     Route::put('users/{user}/roles', [AdminUserController::class, 'updateRoles'])->name('users.roles');
     Route::post('users/bulk-action', [AdminUserController::class, 'bulkAction'])->name('users.bulk-action');
-    
+
     // Impersonation routes (Super Admin only)
     Route::middleware('role:super_admin')->group(function () {
         Route::post('users/{user}/impersonate', [AdminUserController::class, 'impersonate'])->name('users.impersonate');
-    //     // แก้ไข route สำหรับ stop impersonating
-    //     Route::get('users/stop-impersonating', [AdminUserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
-    //     Route::post('users/stop-impersonating', [AdminUserController::class, 'stopImpersonating']);
+        //     // แก้ไข route สำหรับ stop impersonating
+        //     Route::get('users/stop-impersonating', [AdminUserController::class, 'stopImpersonating'])->name('users.stop-impersonating');
+        //     Route::post('users/stop-impersonating', [AdminUserController::class, 'stopImpersonating']);
     });
 });
 

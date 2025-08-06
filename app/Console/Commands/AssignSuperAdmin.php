@@ -1,4 +1,5 @@
 <?php
+
 // app/Console/Commands/AssignSuperAdmin.php
 
 namespace App\Console\Commands;
@@ -17,33 +18,36 @@ class AssignSuperAdmin extends Command
     {
         $userId = $this->argument('user_id');
         $keepRoles = $this->option('keep-roles');
-        
+
         // Find user
         $user = User::find($userId);
-        if (!$user) {
+        if (! $user) {
             $this->error("❌ User ID {$userId} not found!");
+
             return 1;
         }
 
         // Find super admin role
         $superAdminRole = Role::where('name', 'super_admin')->first();
-        if (!$superAdminRole) {
+        if (! $superAdminRole) {
             $this->error('❌ Super Admin role not found! Please run seeders first.');
             $this->line('   Run: php artisan db:seed --class=RoleSeeder');
+
             return 1;
         }
 
         // Check if user already has super admin role
         if ($user->hasRole('super_admin')) {
             $this->info("ℹ️  {$user->name} ({$user->email}) is already a Super Admin!");
+
             return 0;
         }
 
         // Remove old roles only if --keep-roles is not specified
-        if (!$keepRoles) {
+        if (! $keepRoles) {
             $oldRoles = $user->roles->pluck('display_name')->toArray();
-            if (!empty($oldRoles)) {
-                $this->line("🗑️  Removing existing roles: " . implode(', ', $oldRoles));
+            if (! empty($oldRoles)) {
+                $this->line('🗑️  Removing existing roles: '.implode(', ', $oldRoles));
                 $user->roles()->detach();
             }
         }
@@ -55,10 +59,10 @@ class AssignSuperAdmin extends Command
         ]);
 
         $this->info("✅ {$user->name} ({$user->email}) is now a Super Admin!");
-        
+
         // Show current roles
         $currentRoles = $user->fresh()->roles->pluck('display_name')->toArray();
-        $this->line("📋 Current roles: " . implode(', ', $currentRoles));
+        $this->line('📋 Current roles: '.implode(', ', $currentRoles));
 
         return 0;
     }
