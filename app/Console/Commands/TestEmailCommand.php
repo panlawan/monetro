@@ -20,7 +20,7 @@ class TestEmailCommand extends Command
         if (! $user) {
             $this->error('User not found');
 
-            return;
+            return Command::FAILURE;
         }
 
         $this->info("Sending test email to: {$user->email}");
@@ -31,6 +31,10 @@ class TestEmailCommand extends Command
             $this->info('🌐 Check Mailhog at: http://localhost:8025');
         } catch (\Exception $e) {
             $this->error('❌ Failed to send email: '.$e->getMessage());
+
+            return Command::FAILURE;
         }
+
+        return Command::SUCCESS;
     }
 }

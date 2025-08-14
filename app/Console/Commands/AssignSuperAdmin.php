@@ -24,7 +24,7 @@ class AssignSuperAdmin extends Command
         if (! $user) {
             $this->error("❌ User ID {$userId} not found!");
 
-            return 1;
+            return Command::FAILURE;
         }
 
         // Find super admin role
@@ -33,14 +33,14 @@ class AssignSuperAdmin extends Command
             $this->error('❌ Super Admin role not found! Please run seeders first.');
             $this->line('   Run: php artisan db:seed --class=RoleSeeder');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         // Check if user already has super admin role
         if ($user->hasRole('super_admin')) {
             $this->info("ℹ️  {$user->name} ({$user->email}) is already a Super Admin!");
 
-            return 0;
+            return Command::SUCCESS;
         }
 
         // Remove old roles only if --keep-roles is not specified
@@ -64,6 +64,6 @@ class AssignSuperAdmin extends Command
         $currentRoles = $user->fresh()->roles->pluck('display_name')->toArray();
         $this->line('📋 Current roles: '.implode(', ', $currentRoles));
 
-        return 0;
+        return Command::SUCCESS;
     }
 }
