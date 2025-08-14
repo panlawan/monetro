@@ -151,6 +151,6 @@ class UpdateRolePermissions extends Command
 
         $this->info('🎉 Role permissions update completed!');
 
-        return 0;
+        return Command::SUCCESS;
     }
 }
