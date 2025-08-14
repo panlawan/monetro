@@ -172,7 +172,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getAvatarUrlAttribute()
     {
-        \Log::info('Getting avatar URL', [
+        \Log::debug('Getting avatar URL', [
             'user_id' => $this->id,
             'avatar_path' => $this->avatar,
         ]);
@@ -184,11 +184,11 @@ class User extends Authenticatable implements MustVerifyEmail
             // Check if file exists in storage
             if (Storage::disk('public')->exists($cleanPath)) {
                 $url = asset('storage/'.$cleanPath);
-                \Log::info('Avatar URL generated', ['url' => $url]);
+                \Log::debug('Avatar URL generated', ['url' => $url]);
 
                 return $url;
             } else {
-                \Log::warning('Avatar file not found', [
+                \Log::debug('Avatar file not found', [
                     'path' => $cleanPath,
                     'full_path' => storage_path('app/public/'.$cleanPath),
                 ]);
@@ -197,7 +197,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Default avatar using UI Avatars service
         $defaultUrl = 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=6366f1&color=ffffff&size=200';
-        \Log::info('Using default avatar', ['url' => $defaultUrl]);
+        \Log::debug('Using default avatar', ['url' => $defaultUrl]);
 
         return $defaultUrl;
     }
