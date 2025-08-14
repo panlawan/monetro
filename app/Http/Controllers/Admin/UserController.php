@@ -329,16 +329,16 @@ class UserController extends Controller
             ], 400);
         }
 
-        $user->roles()->detach();
-
-        if ($request->roles) {
-            foreach ($request->roles as $roleId) {
-                $user->roles()->attach($roleId, [
-                    'assigned_at' => now(),
-                    'assigned_by' => auth()->id(),
-                ]);
-            }
-        }
+        $user->roles()->sync(
+            collect($request->roles ?? [])
+                ->mapWithKeys(fn ($roleId) => [
+                    $roleId => [
+                        'assigned_at' => now(),
+                        'assigned_by' => auth()->id(),
+                    ],
+                ])
+                ->toArray()
+        );
 
         return response()->json([
             'success' => true,
