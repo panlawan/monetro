@@ -2,6 +2,7 @@
 
 // routes/web.php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -17,22 +18,6 @@ Route::get('/dashboard', function () {
 
     return view('dashboard', compact('user'));
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// Custom Email Verification Routes
-Route::middleware('auth')->group(function () {
-    Route::get('/email/verify', [App\Http\Controllers\EmailVerificationController::class, 'show'])
-        ->name('verification.notice');
-
-    Route::post('/email/verification-notification', [App\Http\Controllers\EmailVerificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-});
 
 // Admin routes
 Route::middleware(['auth', 'role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -56,9 +41,6 @@ Route::middleware(['auth', 'role:admin,super_admin'])->prefix('admin')->name('ad
     });
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/stop-impersonating', [AdminUserController::class, 'stopImpersonating'])->name('stop-impersonating');
-});
 
 // Super Admin routes
 Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -73,16 +55,39 @@ Route::middleware(['auth', 'role:moderator,admin,super_admin'])->prefix('moderat
     })->name('dashboard');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('api/dashboard')->group(function () {
+        Route::get('/summary', [DashboardController::class, 'summary'])->name('api.dashboard.summary');
+        Route::get('/monthly', [DashboardController::class, 'monthly'])->name('api.dashboard.monthly');
+    });
+
+    Route::post('/preferences/theme', [DashboardController::class, 'setTheme'])->name('preferences.theme');
+});
+
 // Debug routes (remove in production)
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+    Route::get('/email/verify', [App\Http\Controllers\EmailVerificationController::class, 'show'])
+        ->name('verification.notice');
+
+    Route::post('/email/verification-notification', [App\Http\Controllers\EmailVerificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
     Route::get('/debug/avatar/{user}', function (\App\Models\User $user) {
         return response()->json([
             'user_id' => $user->id,
             'avatar_db' => $user->avatar,
             'avatar_url' => $user->avatar_url ?? null,
             'storage_exists' => $user->avatar ? \Storage::disk('public')->exists(str_replace('storage/', '', $user->avatar)) : false,
-            'storage_path' => $user->avatar ? storage_path('app/public/'.str_replace('storage/', '', $user->avatar)) : null,
-            'public_path' => $user->avatar ? public_path('storage/'.str_replace('storage/', '', $user->avatar)) : null,
+            'storage_path' => $user->avatar ? storage_path('app/public/' . str_replace('storage/', '', $user->avatar)) : null,
+            'public_path' => $user->avatar ? public_path('storage/' . str_replace('storage/', '', $user->avatar)) : null,
         ]);
     });
 
@@ -96,6 +101,24 @@ Route::middleware('auth')->group(function () {
             'sample_files' => \Storage::disk('public')->files('avatars'),
         ]);
     });
+    Route::get('/stop-impersonating', [AdminUserController::class, 'stopImpersonating'])->name('stop-impersonating');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+
+    // Route::prefix('api/dashboard')->group(function () {
+    //     Route::get('/summary', [DashboardController::class, 'summary'])
+    //         ->name('api.dashboard.summary');
+    //     Route::get('/monthly', [DashboardController::class, 'monthly'])   // << เพิ่ม
+    //         ->name('api.dashboard.monthly');
+    // });
+
+    // JSON endpoints สำหรับหน้า dashboard
+    // Route::get('/api/dashboard/summary', [DashboardController::class, 'summary'])->name('api.dashboard.summary');
+    // Route::get('/api/dashboard/charts/monthly', [DashboardController::class, 'monthlyChart'])->name('api.dashboard.monthly');
+
+    // เปลี่ยนธีม (light/dark/auto)
+    Route::post('/preferences/theme', [DashboardController::class, 'setTheme'])->name('preferences.theme');
 });
 
 // Test route สำหรับ Tailwind CSS
@@ -103,4 +126,4 @@ Route::get('/test-tailwind', function () {
     return view('test-tailwind');
 })->name('test.tailwind');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

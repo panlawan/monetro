@@ -1,4 +1,8 @@
 {{-- resources/views/layouts/app.blade.php --}}
+@php
+  $themePref = $pref ?? (optional(auth()->user()->preference)->theme_preference ?? 'auto');
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -55,5 +59,6 @@
             // Initialize CSRF on page load
             document.addEventListener('DOMContentLoaded', setupCSRF);
         </script>
+        @stack('scripts')
     </body>
 </html>

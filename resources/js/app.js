@@ -1,7 +1,7 @@
-import './bootstrap';
+import './bootstrap'
+import Alpine from 'alpinejs'
+import dashboard from './dashboard'   // << นำเข้าจากข้อ 1
 
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
+window.Alpine = Alpine
+Alpine.data('dashboard', dashboard)   // << ลงทะเบียนชื่อ 'dashboard'
+Alpine.start()
