@@ -6,7 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,6 +57,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::post('/preferences/theme', [DashboardController::class, 'setTheme'])->name('preferences.theme');
+
+    Route::get('/transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
+    Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
 });
 
 // Debug routes (remove in production)
