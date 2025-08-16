@@ -70,9 +70,10 @@ class ReportService
 
             // ตรวจสอบ column ที่มีอยู่
             $dateColumn = $this->getDateColumn();
-            
-            $startDate = Carbon::now()->subMonths($months)->startOfMonth();
-            $endDate = Carbon::now()->endOfMonth();
+            $now = Carbon::now();
+
+            $startDate = $now->copy()->subMonths($months)->startOfMonth();
+            $endDate = $now->copy()->endOfMonth();
 
             $results = DB::table('transactions')
                 ->where('user_id', $userId)
@@ -93,7 +94,7 @@ class ReportService
             $netData = [];
 
             for ($i = $months - 1; $i >= 0; $i--) {
-                $month = Carbon::now()->subMonths($i)->format('Y-m');
+                $month = $now->copy()->subMonths($i)->format('Y-m');
                 $monthsArray[] = $month;
                 
                 // หาข้อมูลสำหรับเดือนนี้
@@ -188,8 +189,10 @@ class ReportService
         $expenseData = [];
         $netData = [];
 
+        $now = Carbon::now();
+
         for ($i = $months - 1; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i)->format('Y-m');
+            $month = $now->copy()->subMonths($i)->format('Y-m');
             $monthsArray[] = $month;
             
             // สร้างข้อมูลสุ่มที่สมจริง
