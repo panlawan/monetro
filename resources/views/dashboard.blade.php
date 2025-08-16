@@ -19,43 +19,41 @@
         </div>
     </x-slot>
 
-    {{-- Alpine root --}}
-    <div x-data="dashboard()" x-init="init()" @dispose.window="destroy()" class="py-6">
+    {{-- Alpine root - เพิ่ม key เพื่อป้องกัน double initialization --}}
+    <div x-data="dashboard()" x-init="init()" @beforeunload.window="destroy()" class="py-6" key="dashboard-component">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Filters --}}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <div>
-  <label for="fromDate" class="text-sm text-gray-600 dark:text-gray-300">From</label>
-  <input id="fromDate" name="from" type="date" x-model="from"
-         class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-gray-100">
-</div>
+                    <label for="fromDate" class="text-sm text-gray-600 dark:text-gray-300">From</label>
+                    <input id="fromDate" name="from" type="date" x-model="from"
+                        class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-gray-100">
+                </div>
 
-<div>
-  <label for="toDate" class="text-sm text-gray-600 dark:text-gray-300">To</label>
-  <input id="toDate" name="to" type="date" x-model="to"
-         class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-gray-100">
-</div>
+                <div>
+                    <label for="toDate" class="text-sm text-gray-600 dark:text-gray-300">To</label>
+                    <input id="toDate" name="to" type="date" x-model="to"
+                        class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-gray-100">
+                </div>
 
-<div>
-  <label for="monthsSelect" class="text-sm text-gray-600 dark:text-gray-300">Months (charts)</label>
-  <select id="monthsSelect" name="months" x-model.number="months"
-          @change="loadMonthly().then(() => drawCharts())"
-          class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-gray-100">
-    <option :value="6">6</option>
-    <option :value="12">12</option>
-    <option :value="24">24</option>
-  </select>
-</div>
+                <div>
+                    <label for="monthsSelect" class="text-sm text-gray-600 dark:text-gray-300">Months (charts)</label>
+                    <select id="monthsSelect" name="months" x-model.number="months"
+                        @change="loadMonthly().then(() => drawCharts())"
+                        class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:text-gray-100">
+                        <option :value="6">6</option>
+                        <option :value="12">12</option>
+                        <option :value="24">24</option>
+                    </select>
+                </div>
 
-<div class="flex items-end">
-  <button @click="applyRange()"
-          class="px-4 py-2 rounded bg-emerald-600 text-white w-full"
-          aria-label="Refresh dashboard summary and charts">
-    Refresh
-  </button>
-</div>
-
+                <div class="flex items-end">
+                    <button @click="applyRange()" class="px-4 py-2 rounded bg-emerald-600 text-white w-full"
+                        aria-label="Refresh dashboard summary and charts">
+                        Refresh
+                    </button>
+                </div>
             </div>
 
             {{-- Summary Cards --}}
@@ -83,22 +81,26 @@
             {{-- Charts --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="p-4 rounded-lg bg-white dark:bg-gray-900 shadow">
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between mb-4">
                         <h3 class="font-semibold text-gray-800 dark:text-gray-100">
                             Income vs Expense (<span x-text="months"></span> months)
                         </h3>
                     </div>
-                    <div class="relative h-72">
-                        <canvas x-ref="incExpCanvas"></canvas>
+                    <div class="chart-container">
+                        <canvas x-ref="incExpCanvas" class="w-full h-full"
+                            :id="'income-chart-' + Math.random().toString(36).substr(2, 9)">
+                        </canvas>
                     </div>
                 </div>
 
                 <div class="p-4 rounded-lg bg-white dark:bg-gray-900 shadow">
-                    <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                    <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">
                         Net Income (<span x-text="months"></span> months)
                     </h3>
-                    <div class="relative h-72">
-                        <canvas x-ref="netCanvas"></canvas>
+                    <div class="chart-container">
+                        <canvas x-ref="netCanvas" class="w-full h-full"
+                            :id="'net-chart-' + Math.random().toString(36).substr(2, 9)">
+                        </canvas>
                     </div>
                 </div>
             </div>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\AvatarHelper;
 
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Role[] $roles
@@ -105,7 +106,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function assignRole($roleName)
     {
         $role = Role::where('name', $roleName)->first();
-        if ($role && ! $this->hasRole($roleName)) {
+        if ($role && !$this->hasRole($roleName)) {
             $this->roles()->attach($role->id, [
                 'assigned_at' => now(),
                 'assigned_by' => auth()->id(),
@@ -183,23 +184,19 @@ class User extends Authenticatable implements MustVerifyEmail
 
             // Check if file exists in storage
             if (Storage::disk('public')->exists($cleanPath)) {
-                $url = asset('storage/'.$cleanPath);
+                $url = asset('storage/' . $cleanPath);
                 \Log::info('Avatar URL generated', ['url' => $url]);
-
                 return $url;
             } else {
                 \Log::warning('Avatar file not found', [
                     'path' => $cleanPath,
-                    'full_path' => storage_path('app/public/'.$cleanPath),
+                    'full_path' => storage_path('app/public/' . $cleanPath),
                 ]);
             }
         }
 
-        // Default avatar using UI Avatars service
-        $defaultUrl = 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&background=6366f1&color=ffffff&size=200';
-        \Log::info('Using default avatar', ['url' => $defaultUrl]);
-
-        return $defaultUrl;
+        // ไม่ใช้ external URL แล้ว - จะใช้ CSS component แทน
+        return null;
     }
 
     // ==========================================

@@ -1,64 +1,68 @@
 {{-- resources/views/layouts/app.blade.php --}}
 @php
-  $themePref = $pref ?? (optional(auth()->user()->preference)->theme_preference ?? 'auto');
+    $themePref = $pref ?? (optional(auth()->user()->preference)->theme_preference ?? 'auto');
 @endphp
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+{{-- แก้ไข resources/views/layouts/app.blade.php --}}
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    {{-- ลบ CSP Meta Tag ออก เพราะไม่ต้องใช้ CDN แล้ว --}}
+    {{-- ลบ font links ออก --}}
+    {{-- <link rel="preconnect" href="https://fonts.bunny.net"> --}}
+    {{-- <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" /> --}}
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> --}}
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
+<body class="font-sans antialiased">
+    <div class="min-h-screen bg-gray-100">
+        @include('layouts.navigation')
 
-        <!-- Global JavaScript for Admin Functions -->
-        <script>
-            // Set up CSRF token for all AJAX requests
-            window.Laravel = {
-                csrfToken: '{{ csrf_token() }}'
-            };
+        <!-- Page Heading -->
+        @if (isset($header))
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
+        @endif
 
-            // Setup CSRF for fetch requests
-            function setupCSRF() {
-                const token = document.querySelector('meta[name="csrf-token"]');
-                if (token) {
-                    window.Laravel.csrfToken = token.getAttribute('content');
-                }
+        <!-- Page Content -->
+        <main>
+            {{ $slot }}
+        </main>
+    </div>
+
+    <!-- Global JavaScript for Admin Functions -->
+    <script>
+        // Set up CSRF token for all AJAX requests
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}'
+        };
+
+        // Setup CSRF for fetch requests
+        function setupCSRF() {
+            const token = document.querySelector('meta[name="csrf-token"]');
+            if (token) {
+                window.Laravel.csrfToken = token.getAttribute('content');
             }
+        }
 
-            // Initialize CSRF on page load
-            document.addEventListener('DOMContentLoaded', setupCSRF);
-        </script>
-        @stack('scripts')
-    </body>
+        // Initialize CSRF on page load
+        document.addEventListener('DOMContentLoaded', setupCSRF);
+    </script>
+    @stack('scripts')
+</body>
+
 </html>

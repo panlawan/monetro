@@ -1,10 +1,17 @@
 /* resources/css/app.css */
 
+/* Import Fonts และ Icons */
+@import '@fontsource/figtree/400.css';
+@import '@fontsource/figtree/500.css';
+@import '@fontsource/figtree/600.css';
+@import '@fortawesome/fontawesome-free/css/all.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer components {
+
     /* Base Button */
     .btn {
         @apply inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150;
@@ -85,5 +92,38 @@
 
     .btn-reset {
         @apply btn btn-secondary btn-md;
+    }
+
+    /* Chart.js canvas styling */
+    .chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+
+    .chart-container canvas {
+        display: block !important;
+        box-sizing: border-box;
+        height: 400px !important;
+        width: 100% !important;
+    }
+
+    /* ป้องกันปัญหา responsive ของ Chart.js */
+    .chart-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Dark mode support สำหรับ charts */
+    .dark .chart-container {
+        background: transparent;
+    }
+
+    /* Prevent chart jumping/flickering */
+    canvas {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 }
