@@ -12,13 +12,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
-
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-
-    return view('dashboard', compact('user'));
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 // Admin routes
 Route::middleware(['auth', 'role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -55,7 +48,7 @@ Route::middleware(['auth', 'role:moderator,admin,super_admin'])->prefix('moderat
     })->name('dashboard');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('api/dashboard')->group(function () {
@@ -102,9 +95,6 @@ Route::middleware('auth')->group(function () {
         ]);
     });
     Route::get('/stop-impersonating', [AdminUserController::class, 'stopImpersonating'])->name('stop-impersonating');
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
 
     // Route::prefix('api/dashboard')->group(function () {
     //     Route::get('/summary', [DashboardController::class, 'summary'])
