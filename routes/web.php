@@ -80,27 +80,29 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-    Route::get('/debug/avatar/{user}', function (\App\Models\User $user) {
-        return response()->json([
-            'user_id' => $user->id,
-            'avatar_db' => $user->avatar,
-            'avatar_url' => $user->avatar_url ?? null,
-            'storage_exists' => $user->avatar ? \Storage::disk('public')->exists(str_replace('storage/', '', $user->avatar)) : false,
-            'storage_path' => $user->avatar ? storage_path('app/public/' . str_replace('storage/', '', $user->avatar)) : null,
-            'public_path' => $user->avatar ? public_path('storage/' . str_replace('storage/', '', $user->avatar)) : null,
-        ]);
-    });
+    if (app()->environment('local')) {
+        Route::get('/debug/avatar/{user}', function (\App\Models\User $user) {
+            return response()->json([
+                'user_id' => $user->id,
+                'avatar_db' => $user->avatar,
+                'avatar_url' => $user->avatar_url ?? null,
+                'storage_exists' => $user->avatar ? \Storage::disk('public')->exists(str_replace('storage/', '', $user->avatar)) : false,
+                'storage_path' => $user->avatar ? storage_path('app/public/' . str_replace('storage/', '', $user->avatar)) : null,
+                'public_path' => $user->avatar ? public_path('storage/' . str_replace('storage/', '', $user->avatar)) : null,
+            ]);
+        });
 
-    Route::get('/debug/storage', function () {
-        return response()->json([
-            'storage_link_exists' => is_link(public_path('storage')),
-            'storage_link_target' => readlink(public_path('storage')),
-            'avatars_dir_exists' => is_dir(storage_path('app/public/avatars')),
-            'avatars_writable' => is_writable(storage_path('app/public/avatars')),
-            'public_storage_exists' => is_dir(public_path('storage')),
-            'sample_files' => \Storage::disk('public')->files('avatars'),
-        ]);
-    });
+        Route::get('/debug/storage', function () {
+            return response()->json([
+                'storage_link_exists' => is_link(public_path('storage')),
+                'storage_link_target' => readlink(public_path('storage')),
+                'avatars_dir_exists' => is_dir(storage_path('app/public/avatars')),
+                'avatars_writable' => is_writable(storage_path('app/public/avatars')),
+                'public_storage_exists' => is_dir(public_path('storage')),
+                'sample_files' => \Storage::disk('public')->files('avatars'),
+            ]);
+        });
+    }
     Route::get('/stop-impersonating', [AdminUserController::class, 'stopImpersonating'])->name('stop-impersonating');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
