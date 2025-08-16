@@ -6,9 +6,16 @@ namespace App\Helpers;
 class AvatarHelper
 {
     /**
-     * Generate SVG avatar from initials
+     * Generate SVG avatar from initials.
+     *
+     * @param string $name            Full name to extract initials from
+     * @param int    $size            Width and height of the resulting image
+     * @param string $backgroundColor Hex color for the background (without '#')
+     * @param string $textColor       Hex color for the text (without '#')
+     *
+     * @return string Base64 encoded SVG data URI
      */
-    public static function generateSvgAvatar($name, $size = 200, $backgroundColor = '6366f1', $textColor = 'ffffff')
+    public static function generateSvgAvatar(string $name, int $size = 200, string $backgroundColor = '6366f1', string $textColor = 'ffffff'): string
     {
         $initials = self::getInitials($name);
         
@@ -25,27 +32,37 @@ class AvatarHelper
     }
     
     /**
-     * Get initials from name
+     * Get initials from name.
+     *
+     * @param string $name Full name to extract initials from
+     *
+     * @return string Two-character initials or 'U' if none found
      */
-    private static function getInitials($name)
+    private static function getInitials(string $name): string
     {
-        $words = explode(' ', trim($name));
-        $initials = '';
-        
+        $words     = explode(' ', trim($name));
+        $initials  = '';
+
         foreach ($words as $word) {
             if (!empty($word)) {
                 $initials .= strtoupper(substr($word, 0, 1));
-                if (strlen($initials) >= 2) break;
+                if (strlen($initials) >= 2) {
+                    break;
+                }
             }
         }
-        
+
         return $initials ?: 'U';
     }
     
     /**
-     * Generate color from name (consistent color for same name)
+     * Generate color from name (consistent color for same name).
+     *
+     * @param string $name Name to hash for color selection
+     *
+     * @return string Hex color string (without '#')
      */
-    public static function getColorFromName($name)
+    public static function getColorFromName(string $name): string
     {
         $colors = [
             '6366f1', // indigo
@@ -59,7 +76,7 @@ class AvatarHelper
             'ec4899', // pink
             '84cc16', // lime
         ];
-        
+
         $hash = crc32($name);
         return $colors[abs($hash) % count($colors)];
     }
